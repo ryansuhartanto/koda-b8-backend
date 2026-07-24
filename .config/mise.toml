@@ -1,0 +1,19 @@
+[tools]
+go = "1.26.5"
+"go:github.com/golang-migrate/migrate/v4/cmd/migrate" = { version = "latest", tags = "pgx5" }
+
+[env]
+_.file = { path = ".env", redact = false }
+
+[tasks."db:create"]
+usage = 'arg "<name>"'
+run = "migrate create -ext sql -dir db/migrations -seq {{usage.name}}"
+
+[tasks.db]
+run = "migrate -database pgx5://: -path db/migrations"
+
+[tasks."db:up"]
+run = "mise run db up"
+
+[tasks."db:down"]
+run = "mise run db down"
