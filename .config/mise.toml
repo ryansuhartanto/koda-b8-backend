@@ -27,6 +27,16 @@ run = "go test ./..."
 [tasks."test:js"]
 run = "aubx vp test run"
 
+[tasks."test:watch"]
+run = "mise run test:watch:go ::: test:watch:js"
+
+[tasks."test:watch:go"]
+dir = "apps/go"
+run = "go tool gotestsum --watch"
+
+[tasks."test:watch:js"]
+run = "aubx vp test"
+
 [tasks.docs]
 run = "mise run docs:go ::: docs:js"
 

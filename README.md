@@ -48,8 +48,8 @@ Docs are at either:
 | `mise run db:up`            | migrations: apply                       |
 | `mise run db:down`          | migrations: roll back                   |
 | `mise run db:create <name>` | migrations: scaffold empty up/down file |
-| `mise run test`             | run Go and JS tests                     |
-| `aubx vp test`              | run JS tests with auto-reload           |
+| `mise run test`             | run tests                               |
+| `mise run test:watch`       | run tests with auto-reload              |
 | `aubx vp check`             | run format, lint and type checks        |
 
 ## ERD
