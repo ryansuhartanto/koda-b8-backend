@@ -1,4 +1,56 @@
-# BeliMudah
+# BeliMudah API
+
+E-commerce services.
+
+## Layout
+
+- `apps/go`: Gin
+- `apps/js`: Express
+- `db/`: Migrations
+
+## Requirements
+
+- [mise](https://mise.jdx.dev)
+- Running Postgres server
+
+## Setup
+
+```sh
+mise install
+aube install
+
+cp .env.example .env # set PGPASSWORD, PGDATABASE, JWT_SECRET
+createdb ecommerce
+mise run db:up
+```
+
+## Running
+
+```sh
+mise run dev
+mise run dev:go # Gin only
+mise run dev:js # Express only
+```
+
+Docs are at either:
+
+- <http://localhost:3001/docs>
+- <http://localhost:3002/docs>
+
+`GET /healthz` to check each service's database connection.
+
+## Tasks
+
+| command                     | description                             |
+| --------------------------- | --------------------------------------- |
+| `mise run dev`              | run services with auto-reload           |
+| `mise run docs`             | regenerate OpenAPI specs                |
+| `mise run db:up`            | migrations: apply                       |
+| `mise run db:down`          | migrations: roll back                   |
+| `mise run db:create <name>` | migrations: scaffold empty up/down file |
+| `mise run test`             | run Go and JS tests                     |
+| `aubx vp test`              | run JS tests with auto-reload           |
+| `aubx vp check`             | run format, lint and type checks        |
 
 ## ERD
 
@@ -161,3 +213,7 @@ order_items {
     int    quantity
 }
 ```
+
+## License
+
+[MIT](LICENSE)
