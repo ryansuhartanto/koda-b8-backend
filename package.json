@@ -13,7 +13,7 @@
 	"scripts": {
 		"fmt": "vp fmt",
 		"lint": "vp lint",
-		"test": "vp test run",
+		"test": "vp test",
 		"dev": "vp run -r --parallel dev",
 		"prepare": "vp config"
 	},

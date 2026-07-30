@@ -17,6 +17,16 @@ run = "go tool air"
 [tasks."dev:js"]
 run = "aubx vp run -r --parallel dev"
 
+[tasks.test]
+run = "mise run test:go ::: test:js"
+
+[tasks."test:go"]
+dir = "apps/go"
+run = "go test ./..."
+
+[tasks."test:js"]
+run = "aubx vp test run"
+
 [tasks.docs]
 run = "mise run docs:go ::: docs:js"
 
