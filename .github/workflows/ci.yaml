@@ -15,8 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: jdx/mise-action@v4
-
       - uses: actions/cache@v6
         with:
           path: |
@@ -31,7 +29,9 @@ jobs:
           key: aube-${{ hashFiles('aube-lock.yaml') }}
           restore-keys: aube-
 
+      - uses: jdx/mise-action@v4
       - run: aube ci
+      - run: go -C apps/go mod tidy -diff
 
       - name: Vet, lint and format
         run: mise run check
