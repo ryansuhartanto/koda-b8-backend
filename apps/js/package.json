@@ -8,9 +8,7 @@
 		]
 	},
 	"scripts": {
-		"dev": "vp exec node --env-file=../../.env --watch --watch-preserve-output src/index.ts",
-		"preview": "vp exec node --env-file=../../.env src/index.ts",
-		"docs": "vp exec node src/docs.ts"
+		"dev": "vp exec node --env-file=../../.env --watch --watch-preserve-output src/index.ts"
 	},
 	"dependencies": {
 		"cors": "^2.8.6",
