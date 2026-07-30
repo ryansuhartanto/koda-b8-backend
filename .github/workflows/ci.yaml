@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  check:
+    name: Check
+
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: jdx/mise-action@v4
+      - run: aube ci
+
+      - name: Vet, lint and format
+        run: mise run check
+
+      - name: Test
+        run: mise run test
+
+      - name: Check specs are current
+        run: |
+          mise run docs
+          git diff --exit-code
