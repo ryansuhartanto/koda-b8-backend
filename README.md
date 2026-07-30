@@ -50,7 +50,7 @@ Docs are at either:
 | `mise run db:create <name>` | migrations: scaffold empty up/down file |
 | `mise run test`             | run tests                               |
 | `mise run test:watch`       | run tests with auto-reload              |
-| `aubx vp check`             | run format, lint and type checks        |
+| `mise run check`            | vet Go, lint and format JS              |
 
 ## ERD
 
