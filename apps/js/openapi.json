@@ -1,0 +1,83 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "BeliMudah API",
+		"version": "1.0",
+		"description": "E-commerce API for the BeliMudah storefront.",
+		"contact": {
+			"name": "Ryan Suhartanto",
+			"url": "https://github.com/ryansuhartanto/koda-b8-backend",
+			"email": "suhartanto@kekkon.nexus"
+		},
+		"license": {
+			"name": "MIT"
+		}
+	},
+	"servers": [
+		{
+			"url": "http://localhost:3002"
+		}
+	],
+	"components": {
+		"securitySchemes": {
+			"BearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		},
+		"schemas": {
+			"Problem": {
+				"type": "object",
+				"properties": {
+					"title": {
+						"type": "string"
+					},
+					"status": {
+						"type": "integer"
+					},
+					"detail": {
+						"type": "string"
+					}
+				},
+				"required": ["title", "status"]
+			}
+		}
+	},
+	"paths": {
+		"/healthz": {
+			"get": {
+				"summary": "Liveness and database reachability",
+				"tags": ["meta"],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "Database unreachable",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"tags": []
+}

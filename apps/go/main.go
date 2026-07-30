@@ -1,0 +1,77 @@
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/PeterTakahashi/gin-openapi/openapiui"
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/model"
+)
+
+// @title       BeliMudah API
+// @version     1.0
+// @description E-commerce API for the BeliMudah storefront.
+
+// @contact.name   Ryan Suhartanto
+// @contact.url    https://github.com/ryansuhartanto/koda-b8-backend
+// @contact.email  suhartanto@kekkon.nexus
+
+// @license.name  MIT
+
+// @servers.url  http://localhost:3001
+
+// @securitydefinitions.bearerauth BearerAuth
+func main() {
+	ctx := context.Background()
+
+	pool, err := pgxpool.New(ctx, "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer pool.Close()
+
+	r := gin.Default()
+
+	r.Any("/", func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusMovedPermanently, "/docs")
+	})
+
+	r.GET("/docs/*any", openapiui.WrapHandler(openapiui.Config{
+		SpecURL:      "/docs/openapi.json",
+		SpecFilePath: "./docs/swagger.json",
+		Title:        "BeliMudah API",
+	}))
+
+	r.GET("/healthz", handleHealthz(pool))
+
+	port := os.Getenv("GO_PORT")
+	if port == "" {
+		port = "3001"
+	}
+
+	if err := r.Run(":" + port); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// handleHealthz godoc
+// @Summary  Liveness and database reachability
+// @Tags     meta
+// @Success  200 {object} map[string]string
+// @Failure  503 {object} model.Problem
+// @Router   /healthz [get]
+func handleHealthz(pool *pgxpool.Pool) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if err := pool.Ping(ctx); err != nil {
+			model.AbortProblem(ctx, http.StatusServiceUnavailable, err.Error())
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
+	}
+}

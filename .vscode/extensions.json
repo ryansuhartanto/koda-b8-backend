@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"editorconfig.editorconfig",
+		"golang.go",
+		"joshbolduc.commitlint",
+		"ms-ossdata.vscode-pgsql",
+		"VoidZero.vite-plus-extension-pack"
+	]
+}

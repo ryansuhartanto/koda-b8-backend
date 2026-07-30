@@ -1,0 +1,52 @@
+components:
+  schemas:
+    model.Problem:
+      properties:
+        detail:
+          type: string
+        status:
+          type: integer
+        title:
+          type: string
+      type: object
+  securitySchemes:
+    BearerAuth:
+      scheme: bearer
+      type: http
+externalDocs:
+  description: ""
+  url: ""
+info:
+  contact:
+    email: suhartanto@kekkon.nexus
+    name: Ryan Suhartanto
+    url: https://github.com/ryansuhartanto/koda-b8-backend
+  description: E-commerce API for the BeliMudah storefront.
+  license:
+    name: MIT
+  title: BeliMudah API
+  version: "1.0"
+openapi: 3.1.0
+paths:
+  /healthz:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: OK
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/model.Problem'
+          description: Service Unavailable
+      summary: Liveness and database reachability
+      tags:
+      - meta
+servers:
+- url: http://localhost:3001

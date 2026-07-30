@@ -1,0 +1,46 @@
+import { writeFile } from "node:fs/promises";
+
+import swaggerJSDoc from "swagger-jsdoc";
+
+export const spec: Record<string, unknown> = swaggerJSDoc({
+	failOnErrors: true,
+	definition: {
+		openapi: "3.1.0",
+		info: {
+			title: "BeliMudah API",
+			version: "1.0",
+			description: "E-commerce API for the BeliMudah storefront.",
+			contact: {
+				name: "Ryan Suhartanto",
+				url: "https://github.com/ryansuhartanto/koda-b8-backend",
+				email: "suhartanto@kekkon.nexus",
+			},
+			license: { name: "MIT" },
+		},
+		servers: [{ url: "http://localhost:3002" }],
+		components: {
+			securitySchemes: {
+				BearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+			},
+			schemas: {
+				Problem: {
+					type: "object",
+					properties: {
+						title: { type: "string" },
+						status: { type: "integer" },
+						detail: { type: "string" },
+					},
+					required: ["title", "status"],
+				},
+			},
+		},
+	},
+	apis: [`${import.meta.dirname}/**/*.ts`],
+}) as Record<string, unknown>;
+
+if (import.meta.main) {
+	await writeFile(
+		new URL("../openapi.json", import.meta.url),
+		`${JSON.stringify(spec, null, "\t")}\n`,
+	);
+}

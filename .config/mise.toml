@@ -1,9 +1,31 @@
 [tools]
 go = "1.26.5"
+node = "26"
+aube = "latest"
 "go:github.com/golang-migrate/migrate/v4/cmd/migrate" = { version = "latest", tags = "pgx5" }
 
 [env]
 _.file = { path = ".env", redact = false }
+
+[tasks.dev]
+run = "mise run dev:go ::: dev:js"
+
+[tasks."dev:go"]
+dir = "apps/go"
+run = "go tool air"
+
+[tasks."dev:js"]
+run = "aubx vp run -r --parallel dev"
+
+[tasks.docs]
+run = "mise run docs:go ::: docs:js"
+
+[tasks."docs:go"]
+dir = "apps/go"
+run = "go tool swag init --v3.1"
+
+[tasks."docs:js"]
+run = "node apps/js/src/docs.ts"
 
 [tasks."db:create"]
 usage = 'arg "<name>"'

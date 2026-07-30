@@ -1,0 +1,25 @@
+{
+	"editor.insertSpaces": false,
+	"editor.tabSize": 2,
+
+	"oxc.enable": true,
+	"oxc.fmt.configPath": "./vite.config.ts",
+	"js/ts.tsdk.path": "node_modules/typescript/lib",
+
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"editor.formatOnSave": true,
+	"editor.formatOnSaveMode": "file",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.oxc": "explicit"
+	},
+
+	"[go][go.mod][go.sum][go.work]": {
+		"editor.defaultFormatter": "golang.go"
+	},
+	"[javascript][javascriptreact][typescript][typescriptreact]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[sql]": {
+		"editor.defaultFormatter": "ms-ossdata.vscode-pgsql"
+	}
+}
