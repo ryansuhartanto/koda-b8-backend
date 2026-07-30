@@ -62,8 +62,9 @@ func main() {
 // handleHealthz godoc
 // @Summary  Liveness and database reachability
 // @Tags     meta
-// @Success  200 {object} map[string]string
-// @Failure  503 {object} model.Problem
+// @Produce  json
+// @Success  200 {object} map[string]string "OK"
+// @Failure  503 {object} model.Problem     "Database unreachable"
 // @Router   /healthz [get]
 func handleHealthz(pool *pgxpool.Pool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {

@@ -8,7 +8,7 @@ const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
     "components": {
         "schemas": {
-            "model.Problem": {
+            "Problem": {
                 "properties": {
                     "detail": {
                         "type": "string"
@@ -20,6 +20,10 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "required": [
+                    "status",
+                    "title"
+                ],
                 "type": "object"
             }
         },
@@ -68,11 +72,11 @@ const docTemplate = `{
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/model.Problem"
+                                    "$ref": "#/components/schemas/Problem"
                                 }
                             }
                         },
-                        "description": "Service Unavailable"
+                        "description": "Database unreachable"
                     }
                 },
                 "summary": "Liveness and database reachability",

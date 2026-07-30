@@ -1,7 +1,7 @@
 {
     "components": {
         "schemas": {
-            "model.Problem": {
+            "Problem": {
                 "properties": {
                     "detail": {
                         "type": "string"
@@ -13,6 +13,10 @@
                         "type": "string"
                     }
                 },
+                "required": [
+                    "status",
+                    "title"
+                ],
                 "type": "object"
             }
         },
@@ -61,11 +65,11 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/model.Problem"
+                                    "$ref": "#/components/schemas/Problem"
                                 }
                             }
                         },
-                        "description": "Service Unavailable"
+                        "description": "Database unreachable"
                     }
                 },
                 "summary": "Liveness and database reachability",

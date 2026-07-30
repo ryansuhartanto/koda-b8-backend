@@ -32,12 +32,11 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
  *           application/json:
  *             schema:
  *               type: object
- *               properties:
- *                 status: { type: string }
+ *               additionalProperties: { type: string }
  *       "503":
  *         description: Database unreachable
  *         content:
- *           application/problem+json:
+ *           application/json:
  *             schema: { $ref: "#/components/schemas/Problem" }
  */
 app.get("/healthz", async (_req, res) => {

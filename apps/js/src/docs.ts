@@ -20,7 +20,7 @@ export const spec: Record<string, unknown> = swaggerJSDoc({
 		servers: [{ url: "http://localhost:3002" }],
 		components: {
 			securitySchemes: {
-				BearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+				BearerAuth: { type: "http", scheme: "bearer" },
 			},
 			schemas: {
 				Problem: {
@@ -37,6 +37,11 @@ export const spec: Record<string, unknown> = swaggerJSDoc({
 	},
 	apis: [`${import.meta.dirname}/**/*.ts`],
 }) as Record<string, unknown>;
+
+// swagger-jsdoc always emits this; swag emits nothing
+if (Array.isArray(spec["tags"]) && spec["tags"].length === 0) {
+	delete spec["tags"];
+}
 
 if (import.meta.main) {
 	await writeFile(

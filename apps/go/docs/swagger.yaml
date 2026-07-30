@@ -1,6 +1,6 @@
 components:
   schemas:
-    model.Problem:
+    Problem:
       properties:
         detail:
           type: string
@@ -8,6 +8,9 @@ components:
           type: integer
         title:
           type: string
+      required:
+      - status
+      - title
       type: object
   securitySchemes:
     BearerAuth:
@@ -43,8 +46,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/model.Problem'
-          description: Service Unavailable
+                $ref: '#/components/schemas/Problem'
+          description: Database unreachable
       summary: Liveness and database reachability
       tags:
       - meta
