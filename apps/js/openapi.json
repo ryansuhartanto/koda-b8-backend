@@ -39,7 +39,10 @@
 						"type": "string"
 					}
 				},
-				"required": ["title", "status"]
+				"required": [
+					"title",
+					"status"
+				]
 			}
 		}
 	},
@@ -47,7 +50,9 @@
 		"/healthz": {
 			"get": {
 				"summary": "Liveness and database reachability",
-				"tags": ["meta"],
+				"tags": [
+					"meta"
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
