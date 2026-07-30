@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.ref }}
+    env:
+      GOTESTSUM_FORMAT: github-actions
     steps:
       - uses: actions/checkout@v7
 

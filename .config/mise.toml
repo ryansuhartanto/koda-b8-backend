@@ -32,7 +32,7 @@ run = "mise run test:go ::: test:js"
 
 [tasks."test:go"]
 dir = "apps/go"
-run = "go test ./..."
+run = "go tool gotestsum -- ./..."
 
 [tasks."test:js"]
 run = "aubx vp test run"
