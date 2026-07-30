@@ -1,12 +1,7 @@
-import { readFile } from "node:fs/promises";
-
 import { expect, test } from "vite-plus/test";
 
-const read = async (path: string): Promise<Record<string, unknown>> =>
-	JSON.parse(await readFile(new URL(path, import.meta.url), "utf8")) as Record<
-		string,
-		unknown
-	>;
+import go from "../../go/docs/swagger.json" with { type: "json" };
+import js from "../openapi.json" with { type: "json" };
 
 // swag stubs an empty externalDocs that no annotation suppresses
 function contract(spec: Record<string, unknown>): unknown {
@@ -33,9 +28,6 @@ function sortDeep(value: unknown): unknown {
 	);
 }
 
-test("go and js describe the same API", async () => {
-	const go = await read("../../go/docs/swagger.json");
-	const js = await read("../openapi.json");
-
+test("go and js describe the same API", () => {
 	expect(contract(js)).toStrictEqual(contract(go));
 });
