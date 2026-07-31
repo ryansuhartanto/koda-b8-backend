@@ -11,7 +11,7 @@ E-commerce services.
 ## Requirements
 
 - [mise](https://mise.jdx.dev)
-- Running Postgres server
+- Running Postgres server with an empty database
 
 ## Setup
 
@@ -20,8 +20,8 @@ mise install
 aube install
 
 cp .env.example .env # set PGPASSWORD, PGDATABASE, JWT_SECRET
-createdb ecommerce
 mise run db:up
+mise run db:seed
 ```
 
 ## Running
@@ -48,6 +48,7 @@ Docs are at either:
 | `mise run db:up`            | migrations: apply                       |
 | `mise run db:down`          | migrations: roll back                   |
 | `mise run db:create <name>` | migrations: scaffold empty up/down file |
+| `mise run db:seed`          | load the sample catalogue               |
 | `mise run test`             | run tests                               |
 | `mise run test:watch`       | run tests with auto-reload              |
 | `mise run check`            | vet Go, lint and format JS              |

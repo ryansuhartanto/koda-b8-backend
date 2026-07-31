@@ -3,6 +3,7 @@ go = "1.26.5"
 node = "26"
 aube = "latest"
 "go:github.com/golang-migrate/migrate/v4/cmd/migrate" = { version = "latest", tags = "pgx5" }
+usql = "latest"
 
 [env]
 _.file = { path = ".env", redact = false }
@@ -63,6 +64,9 @@ run = "migrate create -ext sql -dir db/migrations -seq {{usage.name}}"
 
 [tasks.db]
 run = "migrate -database pgx5://: -path db/migrations"
+
+[tasks."db:seed"]
+run = 'usql "postgres://" -f db/seed.sql'
 
 [tasks."db:up"]
 run = "mise run db up"
