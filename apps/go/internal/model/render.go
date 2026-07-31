@@ -8,8 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// gin's JSON escapes &, < and >, and its PureJSON trails a newline; JSON.stringify on the
-// JS side does neither, and nothing in the spec test can see the difference
+// gin's JSON escapes &, < and > into \u sequences, and its PureJSON trails a newline
 func render(ctx *gin.Context, status int, contentType string, data any) {
 	buf := bytes.Buffer{}
 	encoder := json.NewEncoder(&buf)

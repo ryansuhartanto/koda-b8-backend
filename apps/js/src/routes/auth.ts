@@ -17,7 +17,6 @@ function isEmail(value: unknown): value is string {
 	return typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-// mirrors the binding tags on model.RegisterRequest
 function toRegisterRequest(body: unknown): RegisterRequest | undefined {
 	const { name, email, password } = (body ?? {}) as Record<string, unknown>;
 
