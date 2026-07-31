@@ -160,4 +160,15 @@ order_items {
     bigint unit_price_idr
     int    quantity
 }
+
+shipping_methods {
+    int id PK
+
+    timestamptz  created_at
+    timestamptz  updated_at
+    timestamptz? deleted_at
+
+    string name UK
+    bigint cost_idr
+}
 ```
