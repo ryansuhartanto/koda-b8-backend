@@ -11,7 +11,6 @@ import (
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/model"
 )
 
-// every ordering ends on id so that pagination cannot repeat or skip a row
 var ProductSort = map[string]string{
 	"newest":     "p.created_at DESC, p.id DESC",
 	"price_asc":  "p.price_idr ASC, p.id ASC",

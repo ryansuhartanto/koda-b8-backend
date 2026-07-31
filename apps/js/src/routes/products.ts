@@ -4,7 +4,6 @@ import { pool } from "#/lib/db";
 import { problem } from "#/lib/problem";
 import type { Product } from "#/model/product";
 
-// every ordering ends on id so that pagination cannot repeat or skip a row
 const sorts: Record<string, string> = {
 	newest: "p.created_at DESC, p.id DESC",
 	price_asc: "p.price_idr ASC, p.id ASC",
