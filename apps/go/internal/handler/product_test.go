@@ -12,7 +12,6 @@ func TestListProductsRejectsUnknownSort(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	// the sort whitelist is checked before the pool is touched
 	r.GET("/products", listProducts(nil))
 
 	rec := httptest.NewRecorder()

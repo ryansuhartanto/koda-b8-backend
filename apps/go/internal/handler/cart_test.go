@@ -13,7 +13,6 @@ func TestSetCartItemRejectsZeroQuantity(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	// binding fails before the pool is touched, so a nil pool never gets dereferenced
 	r.POST("/cart", setCartItem(nil))
 
 	req := httptest.NewRequest(http.MethodPost, "/cart", strings.NewReader(`{"id_product":1,"quantity":0}`))

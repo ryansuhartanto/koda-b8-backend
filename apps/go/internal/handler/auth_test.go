@@ -13,7 +13,6 @@ func TestRegisterRejectsInvalidBody(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
-	// binding fails before the pool is touched, so a nil pool never gets dereferenced
 	r.POST("/auth/register", register(nil))
 
 	req := httptest.NewRequest(http.MethodPost, "/auth/register", strings.NewReader(`{"email":"nope"}`))
