@@ -6,6 +6,7 @@ import { spec } from "#/docs";
 import { pool } from "#/lib/db";
 import { problem } from "#/lib/problem";
 import { cors } from "#/middleware/cors";
+import { router as addresses } from "#/routes/addresses";
 import { router as auth } from "#/routes/auth";
 import { router as cart } from "#/routes/cart";
 import { router as products } from "#/routes/products";
@@ -27,6 +28,7 @@ app.use(auth);
 app.use(products);
 app.use(shipping);
 app.use(cart);
+app.use(addresses);
 
 /**
  * @openapi

@@ -57,6 +57,7 @@ func main() {
 	handler.Product(r, pool)
 	handler.Shipping(r, pool)
 	handler.Cart(r, pool)
+	handler.Address(r, pool)
 
 	port := os.Getenv("GO_PORT")
 	if port == "" {

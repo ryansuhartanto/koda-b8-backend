@@ -218,6 +218,87 @@
 				"required": [
 					"token"
 				]
+			},
+			"Address": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"label": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"province": {
+						"type": "string"
+					},
+					"postal_code": {
+						"type": "string"
+					},
+					"is_default": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"address",
+					"city",
+					"id",
+					"is_default",
+					"label",
+					"name",
+					"phone",
+					"postal_code",
+					"province"
+				]
+			},
+			"AddressRequest": {
+				"type": "object",
+				"properties": {
+					"label": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"province": {
+						"type": "string"
+					},
+					"postal_code": {
+						"type": "string"
+					},
+					"is_default": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"address",
+					"city",
+					"label",
+					"name",
+					"phone",
+					"postal_code",
+					"province"
+				]
 			}
 		}
 	},
@@ -721,6 +802,120 @@
 					},
 					"401": {
 						"description": "Invalid credentials",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/addresses": {
+			"get": {
+				"summary": "List the caller's addresses, default first",
+				"tags": [
+					"addresses"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Address"
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Add an address to the caller's account",
+				"tags": [
+					"addresses"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"requestBody": {
+					"description": "Address",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AddressRequest",
+								"summary": "body",
+								"description": "Address"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Address"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid body",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid token",
 						"content": {
 							"application/json": {
 								"schema": {

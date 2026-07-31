@@ -1,5 +1,63 @@
 components:
   schemas:
+    Address:
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        id:
+          type: integer
+        is_default:
+          type: boolean
+        label:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        postal_code:
+          type: string
+        province:
+          type: string
+      required:
+      - address
+      - city
+      - id
+      - is_default
+      - label
+      - name
+      - phone
+      - postal_code
+      - province
+      type: object
+    AddressRequest:
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        is_default:
+          type: boolean
+        label:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        postal_code:
+          type: string
+        province:
+          type: string
+      required:
+      - address
+      - city
+      - label
+      - name
+      - phone
+      - postal_code
+      - province
+      type: object
     CartItem:
       properties:
         id_product:
@@ -154,6 +212,74 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
+  /addresses:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Address'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Missing or invalid token
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Internal error
+      security:
+      - BearerAuth: []
+      summary: List the caller's addresses, default first
+      tags:
+      - addresses
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+              description: Address
+              summary: body
+        description: Address
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Invalid body
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Missing or invalid token
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Internal error
+      security:
+      - BearerAuth: []
+      summary: Add an address to the caller's account
+      tags:
+      - addresses
   /auth/login:
     post:
       requestBody:
