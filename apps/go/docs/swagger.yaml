@@ -101,6 +101,106 @@ components:
       - email
       - password
       type: object
+    Order:
+      properties:
+        created_at:
+          type: string
+        discount_idr:
+          type: integer
+        id:
+          type: integer
+        items:
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          type: array
+          uniqueItems: false
+        payment_method:
+          type: string
+        promo_code:
+          type: string
+        ship_address:
+          type: string
+        ship_city:
+          type: string
+        ship_cost_idr:
+          type: integer
+        ship_email:
+          type: string
+        ship_method:
+          type: string
+        ship_name:
+          type: string
+        ship_note:
+          type: string
+        ship_phone:
+          type: string
+        ship_postal_code:
+          type: string
+        ship_province:
+          type: string
+        status:
+          type: string
+        subtotal_idr:
+          type: integer
+        total_idr:
+          type: integer
+      required:
+      - created_at
+      - discount_idr
+      - id
+      - items
+      - payment_method
+      - promo_code
+      - ship_address
+      - ship_city
+      - ship_cost_idr
+      - ship_email
+      - ship_method
+      - ship_name
+      - ship_note
+      - ship_phone
+      - ship_postal_code
+      - ship_province
+      - status
+      - subtotal_idr
+      - total_idr
+      type: object
+    OrderItem:
+      properties:
+        id:
+          type: integer
+        id_product:
+          type: integer
+        product_name:
+          type: string
+        quantity:
+          type: integer
+        unit_price_idr:
+          type: integer
+      required:
+      - id
+      - id_product
+      - product_name
+      - quantity
+      - unit_price_idr
+      type: object
+    OrderRequest:
+      properties:
+        id_address:
+          type: integer
+        payment_method:
+          type: string
+        promo_code:
+          type: string
+        ship_method:
+          type: string
+        ship_note:
+          type: string
+      required:
+      - id_address
+      - payment_method
+      - ship_method
+      type: object
     Problem:
       properties:
         detail:
@@ -483,6 +583,86 @@ paths:
       summary: Liveness and database reachability
       tags:
       - meta
+  /orders:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Order'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Missing or invalid token
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Internal error
+      security:
+      - BearerAuth: []
+      summary: List the caller's orders, newest first
+      tags:
+      - orders
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+              description: Checkout
+              summary: body
+        description: Checkout
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Invalid body
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Missing or invalid token
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: No such address or shipping method
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Empty cart or insufficient stock
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Internal error
+      security:
+      - BearerAuth: []
+      summary: Turn the caller's cart into an order
+      tags:
+      - orders
   /products:
     get:
       parameters:

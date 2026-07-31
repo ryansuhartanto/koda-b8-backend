@@ -126,6 +126,145 @@
 					"tags"
 				]
 			},
+			"OrderItem": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"id_product": {
+						"type": "integer"
+					},
+					"product_name": {
+						"type": "string"
+					},
+					"unit_price_idr": {
+						"type": "integer"
+					},
+					"quantity": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"id",
+					"id_product",
+					"product_name",
+					"quantity",
+					"unit_price_idr"
+				]
+			},
+			"Order": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"payment_method": {
+						"type": "string"
+					},
+					"promo_code": {
+						"type": "string"
+					},
+					"discount_idr": {
+						"type": "integer"
+					},
+					"subtotal_idr": {
+						"type": "integer"
+					},
+					"ship_cost_idr": {
+						"type": "integer"
+					},
+					"total_idr": {
+						"type": "integer"
+					},
+					"ship_name": {
+						"type": "string"
+					},
+					"ship_phone": {
+						"type": "string"
+					},
+					"ship_email": {
+						"type": "string"
+					},
+					"ship_address": {
+						"type": "string"
+					},
+					"ship_city": {
+						"type": "string"
+					},
+					"ship_province": {
+						"type": "string"
+					},
+					"ship_postal_code": {
+						"type": "string"
+					},
+					"ship_method": {
+						"type": "string"
+					},
+					"ship_note": {
+						"type": "string"
+					},
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/OrderItem"
+						},
+						"uniqueItems": false
+					}
+				},
+				"required": [
+					"created_at",
+					"discount_idr",
+					"id",
+					"items",
+					"payment_method",
+					"promo_code",
+					"ship_address",
+					"ship_city",
+					"ship_cost_idr",
+					"ship_email",
+					"ship_method",
+					"ship_name",
+					"ship_note",
+					"ship_phone",
+					"ship_postal_code",
+					"ship_province",
+					"status",
+					"subtotal_idr",
+					"total_idr"
+				]
+			},
+			"OrderRequest": {
+				"type": "object",
+				"properties": {
+					"id_address": {
+						"type": "integer"
+					},
+					"payment_method": {
+						"type": "string"
+					},
+					"ship_method": {
+						"type": "string"
+					},
+					"promo_code": {
+						"type": "string"
+					},
+					"ship_note": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id_address",
+					"payment_method",
+					"ship_method"
+				]
+			},
 			"CartItem": {
 				"type": "object",
 				"properties": {
@@ -500,6 +639,140 @@
 					},
 					"404": {
 						"description": "No such product",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/orders": {
+			"get": {
+				"summary": "List the caller's orders, newest first",
+				"tags": [
+					"orders"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Order"
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Turn the caller's cart into an order",
+				"tags": [
+					"orders"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"requestBody": {
+					"description": "Checkout",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OrderRequest",
+								"summary": "body",
+								"description": "Checkout"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Order"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid body",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "No such address or shipping method",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Empty cart or insufficient stock",
 						"content": {
 							"application/json": {
 								"schema": {

@@ -9,6 +9,7 @@ import { cors } from "#/middleware/cors";
 import { router as addresses } from "#/routes/addresses";
 import { router as auth } from "#/routes/auth";
 import { router as cart } from "#/routes/cart";
+import { router as orders } from "#/routes/orders";
 import { router as products } from "#/routes/products";
 import { router as shipping } from "#/routes/shipping";
 
@@ -29,6 +30,7 @@ app.use(products);
 app.use(shipping);
 app.use(cart);
 app.use(addresses);
+app.use(orders);
 
 /**
  * @openapi
