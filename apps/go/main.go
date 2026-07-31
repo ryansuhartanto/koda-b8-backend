@@ -54,6 +54,7 @@ func main() {
 	r.GET("/healthz", handleHealthz(pool))
 
 	handler.Auth(r, pool)
+	handler.Product(r, pool)
 
 	port := os.Getenv("GO_PORT")
 	if port == "" {

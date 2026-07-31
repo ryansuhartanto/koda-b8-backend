@@ -41,6 +41,69 @@ const docTemplate = `{
                 ],
                 "type": "object"
             },
+            "Product": {
+                "properties": {
+                    "brand": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "integer"
+                    },
+                    "img": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "original_price_idr": {
+                        "type": "integer"
+                    },
+                    "price_idr": {
+                        "type": "integer"
+                    },
+                    "rating": {
+                        "type": "number"
+                    },
+                    "rating_count": {
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "stock": {
+                        "type": "integer"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "tags": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    }
+                },
+                "required": [
+                    "brand",
+                    "category",
+                    "id",
+                    "img",
+                    "name",
+                    "original_price_idr",
+                    "price_idr",
+                    "rating",
+                    "rating_count",
+                    "slug",
+                    "stock",
+                    "summary",
+                    "tags"
+                ],
+                "type": "object"
+            },
             "RegisterRequest": {
                 "properties": {
                     "email": {
@@ -254,6 +317,158 @@ const docTemplate = `{
                 "summary": "Liveness and database reachability",
                 "tags": [
                     "meta"
+                ]
+            }
+        },
+        "/products": {
+            "get": {
+                "parameters": [
+                    {
+                        "description": "Match against the product name",
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Category name",
+                        "in": "query",
+                        "name": "category",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "One of baru, unggulan, promo",
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "One of newest, price_asc, price_desc, rating",
+                        "in": "query",
+                        "name": "sort",
+                        "schema": {
+                            "enum": [
+                                "newest",
+                                "price_asc",
+                                "price_desc",
+                                "rating"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Rows to return, 1 to 100",
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "default": 20,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Rows to skip",
+                        "in": "query",
+                        "name": "offset",
+                        "schema": {
+                            "default": 0,
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/Product"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Invalid query"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Internal error"
+                    }
+                },
+                "summary": "List products",
+                "tags": [
+                    "products"
+                ]
+            }
+        },
+        "/products/{slug}": {
+            "get": {
+                "parameters": [
+                    {
+                        "description": "Product slug",
+                        "in": "path",
+                        "name": "slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "No such product"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Internal error"
+                    }
+                },
+                "summary": "Fetch one product by slug",
+                "tags": [
+                    "products"
                 ]
             }
         }
