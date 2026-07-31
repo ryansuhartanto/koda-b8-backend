@@ -44,6 +44,69 @@
 					"status"
 				]
 			},
+			"Product": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"brand": {
+						"type": "string"
+					},
+					"category": {
+						"type": "string"
+					},
+					"img": {
+						"type": "string"
+					},
+					"summary": {
+						"type": "string"
+					},
+					"price_idr": {
+						"type": "integer"
+					},
+					"original_price_idr": {
+						"type": "integer"
+					},
+					"stock": {
+						"type": "integer"
+					},
+					"rating": {
+						"type": "number"
+					},
+					"rating_count": {
+						"type": "integer"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"uniqueItems": false
+					}
+				},
+				"required": [
+					"brand",
+					"category",
+					"id",
+					"img",
+					"name",
+					"original_price_idr",
+					"price_idr",
+					"rating",
+					"rating_count",
+					"slug",
+					"stock",
+					"summary",
+					"tags"
+				]
+			},
 			"RegisterRequest": {
 				"type": "object",
 				"properties": {
@@ -115,6 +178,158 @@
 					},
 					"503": {
 						"description": "Database unreachable",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/products": {
+			"get": {
+				"summary": "List products",
+				"tags": [
+					"products"
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "search",
+						"description": "Match against the product name",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "category",
+						"description": "Category name",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "tag",
+						"description": "One of baru, unggulan, promo",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"description": "One of newest, price_asc, price_desc, rating",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"newest",
+								"price_asc",
+								"price_desc",
+								"rating"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"description": "Rows to return, 1 to 100",
+						"schema": {
+							"type": "integer",
+							"default": 20
+						}
+					},
+					{
+						"in": "query",
+						"name": "offset",
+						"description": "Rows to skip",
+						"schema": {
+							"type": "integer",
+							"default": 0
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Product"
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid query",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/products/{slug}": {
+			"get": {
+				"summary": "Fetch one product by slug",
+				"tags": [
+					"products"
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "slug",
+						"required": true,
+						"description": "Product slug",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Product"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "No such product",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
 						"content": {
 							"application/json": {
 								"schema": {
