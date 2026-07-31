@@ -51,7 +51,7 @@ Docs are at either:
 | `mise run db:seed`          | load the sample catalogue               |
 | `mise run test`             | run tests                               |
 | `mise run test:watch`       | run tests with auto-reload              |
-| `mise run check`            | vet Go, lint and format JS              |
+| `mise run check`            | vet Go, lint, format and typecheck JS   |
 
 ## ERD
 

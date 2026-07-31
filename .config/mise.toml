@@ -19,7 +19,7 @@ run = "go tool air"
 run = "aubx vp run -r --parallel dev"
 
 [tasks.check]
-run = "mise run check:go ::: check:js"
+run = "mise run check:go ::: check:js ::: check:types"
 
 [tasks."check:go"]
 dir = "apps/go"
@@ -27,6 +27,10 @@ run = "go vet ./..."
 
 [tasks."check:js"]
 run = "aubx vp check"
+
+# vp check advertises type checks but only runs fmt and lint here
+[tasks."check:types"]
+run = "aubx tsc --noEmit"
 
 [tasks.test]
 run = "mise run test:go ::: test:js"
