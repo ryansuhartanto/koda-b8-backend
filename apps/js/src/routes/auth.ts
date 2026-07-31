@@ -4,12 +4,44 @@ import { Router } from "express";
 import { pool } from "#/lib/db";
 import { problem } from "#/lib/problem";
 import { sign } from "#/lib/token";
+import type {
+	LoginRequest,
+	RegisterRequest,
+	TokenResponse,
+} from "#/model/auth";
 
 // distinguishing a missing account from a bad password is a user-enumeration oracle
 const invalidCredentials = "invalid email or password";
 
 function isEmail(value: unknown): value is string {
 	return typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+// mirrors the binding tags on model.RegisterRequest
+function toRegisterRequest(body: unknown): RegisterRequest | undefined {
+	const { name, email, password } = (body ?? {}) as Record<string, unknown>;
+
+	if (
+		typeof name !== "string" ||
+		name === "" ||
+		!isEmail(email) ||
+		typeof password !== "string" ||
+		password.length < 8
+	) {
+		return undefined;
+	}
+
+	return { name, email, password };
+}
+
+function toLoginRequest(body: unknown): LoginRequest | undefined {
+	const { email, password } = (body ?? {}) as Record<string, unknown>;
+
+	if (!isEmail(email) || typeof password !== "string" || password === "") {
+		return undefined;
+	}
+
+	return { email, password };
 }
 
 export const router: Router = Router();
@@ -73,15 +105,9 @@ export const router: Router = Router();
  *             schema: { $ref: "#/components/schemas/Problem" }
  */
 router.post("/auth/register", async (req, res) => {
-	const { name, email, password } = (req.body ?? {}) as Record<string, unknown>;
+	const body = toRegisterRequest(req.body);
 
-	if (
-		typeof name !== "string" ||
-		name === "" ||
-		!isEmail(email) ||
-		typeof password !== "string" ||
-		password.length < 8
-	) {
+	if (body === undefined) {
 		problem(
 			res,
 			400,
@@ -91,11 +117,11 @@ router.post("/auth/register", async (req, res) => {
 	}
 
 	try {
-		const passwordHash = await hash(password, 10);
+		const passwordHash = await hash(body.password, 10);
 
 		const { rows } = await pool.query<{ id: number }>(
 			"INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id",
-			[name, email, passwordHash],
+			[body.name, body.email, passwordHash],
 		);
 
 		const [user] = rows;
@@ -104,7 +130,9 @@ router.post("/auth/register", async (req, res) => {
 			throw new Error("insert returned no row");
 		}
 
-		res.status(201).json({ token: sign(user.id) });
+		const token: TokenResponse = { token: sign(user.id) };
+
+		res.status(201).json(token);
 	} catch (error) {
 		// unique_violation
 		if ((error as { code?: string }).code === "23505") {
@@ -154,9 +182,9 @@ router.post("/auth/register", async (req, res) => {
  *             schema: { $ref: "#/components/schemas/Problem" }
  */
 router.post("/auth/login", async (req, res) => {
-	const { email, password } = (req.body ?? {}) as Record<string, unknown>;
+	const body = toLoginRequest(req.body);
 
-	if (!isEmail(email) || typeof password !== "string" || password === "") {
+	if (body === undefined) {
 		problem(res, 400, "email and password are required");
 		return;
 	}
@@ -164,17 +192,22 @@ router.post("/auth/login", async (req, res) => {
 	try {
 		const { rows } = await pool.query<{ id: number; password_hash: string }>(
 			"SELECT id, password_hash FROM users WHERE email = $1 AND deleted_at IS NULL",
-			[email],
+			[body.email],
 		);
 
 		const [user] = rows;
 
-		if (user === undefined || !(await compare(password, user.password_hash))) {
+		if (
+			user === undefined ||
+			!(await compare(body.password, user.password_hash))
+		) {
 			problem(res, 401, invalidCredentials);
 			return;
 		}
 
-		res.json({ token: sign(user.id) });
+		const token: TokenResponse = { token: sign(user.id) };
+
+		res.json(token);
 	} catch (error) {
 		problem(res, 500, error);
 	}
