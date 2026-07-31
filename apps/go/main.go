@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/middleware"
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/model"
 )
 
@@ -36,6 +37,8 @@ func main() {
 	defer pool.Close()
 
 	r := gin.Default()
+
+	r.Use(middleware.Cors())
 
 	r.Any("/", func(ctx *gin.Context) {
 		ctx.Redirect(http.StatusMovedPermanently, "/docs")

@@ -1,4 +1,3 @@
-import cors from "cors";
 import express from "express";
 import type { Express } from "express";
 import swaggerUi from "swagger-ui-express";
@@ -6,12 +5,13 @@ import swaggerUi from "swagger-ui-express";
 import { spec } from "#/docs";
 import { pool } from "#/lib/db";
 import { problem } from "#/lib/problem";
+import { cors } from "#/middleware/cors";
 
 const app: Express = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors);
 
 app.get("/", (_req, res) => {
 	res.redirect(301, "/docs");
