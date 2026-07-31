@@ -126,6 +126,53 @@
 					"tags"
 				]
 			},
+			"CartItem": {
+				"type": "object",
+				"properties": {
+					"id_product": {
+						"type": "integer"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"img": {
+						"type": "string"
+					},
+					"price_idr": {
+						"type": "integer"
+					},
+					"quantity": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"id_product",
+					"img",
+					"name",
+					"price_idr",
+					"quantity",
+					"slug"
+				]
+			},
+			"CartRequest": {
+				"type": "object",
+				"properties": {
+					"id_product": {
+						"type": "integer"
+					},
+					"quantity": {
+						"type": "integer",
+						"minimum": 1
+					}
+				},
+				"required": [
+					"id_product",
+					"quantity"
+				]
+			},
 			"RegisterRequest": {
 				"type": "object",
 				"properties": {
@@ -372,6 +419,182 @@
 					},
 					"404": {
 						"description": "No such product",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/cart": {
+			"get": {
+				"summary": "List the caller's cart",
+				"tags": [
+					"cart"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/CartItem"
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Set the quantity of one cart line",
+				"tags": [
+					"cart"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"requestBody": {
+					"description": "Line",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CartRequest",
+								"summary": "body",
+								"description": "Line"
+							}
+						}
+					}
+				},
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"400": {
+						"description": "Invalid body",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "No such product",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/cart/{id_product}": {
+			"delete": {
+				"summary": "Remove one product from the cart",
+				"tags": [
+					"cart"
+				],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id_product",
+						"required": true,
+						"description": "Product id",
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"400": {
+						"description": "Invalid product id",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid token",
 						"content": {
 							"application/json": {
 								"schema": {

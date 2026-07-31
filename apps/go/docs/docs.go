@@ -8,6 +8,53 @@ const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
     "components": {
         "schemas": {
+            "CartItem": {
+                "properties": {
+                    "id_product": {
+                        "type": "integer"
+                    },
+                    "img": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price_idr": {
+                        "type": "integer"
+                    },
+                    "quantity": {
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id_product",
+                    "img",
+                    "name",
+                    "price_idr",
+                    "quantity",
+                    "slug"
+                ],
+                "type": "object"
+            },
+            "CartRequest": {
+                "properties": {
+                    "id_product": {
+                        "type": "integer"
+                    },
+                    "quantity": {
+                        "minimum": 1,
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id_product",
+                    "quantity"
+                ],
+                "type": "object"
+            },
             "LoginRequest": {
                 "properties": {
                     "email": {
@@ -303,6 +350,182 @@ const docTemplate = `{
                 "summary": "Register an account",
                 "tags": [
                     "auth"
+                ]
+            }
+        },
+        "/cart": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/CartItem"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid token"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Internal error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "List the caller's cart",
+                "tags": [
+                    "cart"
+                ]
+            },
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CartRequest",
+                                "summary": "body",
+                                "description": "Line"
+                            }
+                        }
+                    },
+                    "description": "Line",
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Invalid body"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid token"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "No such product"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Internal error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Set the quantity of one cart line",
+                "tags": [
+                    "cart"
+                ]
+            }
+        },
+        "/cart/{id_product}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "description": "Product id",
+                        "in": "path",
+                        "name": "id_product",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Invalid product id"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid token"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Internal error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Remove one product from the cart",
+                "tags": [
+                    "cart"
                 ]
             }
         },

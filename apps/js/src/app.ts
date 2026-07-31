@@ -7,6 +7,7 @@ import { pool } from "#/lib/db";
 import { problem } from "#/lib/problem";
 import { cors } from "#/middleware/cors";
 import { router as auth } from "#/routes/auth";
+import { router as cart } from "#/routes/cart";
 import { router as products } from "#/routes/products";
 import { router as shipping } from "#/routes/shipping";
 
@@ -25,6 +26,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
 app.use(auth);
 app.use(products);
 app.use(shipping);
+app.use(cart);
 
 /**
  * @openapi
