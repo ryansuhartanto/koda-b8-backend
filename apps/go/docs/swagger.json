@@ -1,6 +1,21 @@
 {
     "components": {
         "schemas": {
+            "LoginRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "type": "object"
+            },
             "Problem": {
                 "properties": {
                     "detail": {
@@ -16,6 +31,37 @@
                 "required": [
                     "status",
                     "title"
+                ],
+                "type": "object"
+            },
+            "RegisterRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "minLength": 8,
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "name",
+                    "password"
+                ],
+                "type": "object"
+            },
+            "TokenResponse": {
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "token"
                 ],
                 "type": "object"
             }
@@ -45,6 +91,132 @@
         "url": ""
     },
     "paths": {
+        "/auth/login": {
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest",
+                                "summary": "body",
+                                "description": "Credentials"
+                            }
+                        }
+                    },
+                    "description": "Credentials",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Invalid body"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Invalid credentials"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Internal error"
+                    }
+                },
+                "summary": "Exchange credentials for a token",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest",
+                                "summary": "body",
+                                "description": "Credentials"
+                            }
+                        }
+                    },
+                    "description": "Credentials",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        },
+                        "description": "Created"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Invalid body"
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Email already registered"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Internal error"
+                    }
+                },
+                "summary": "Register an account",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
         "/healthz": {
             "get": {
                 "responses": {

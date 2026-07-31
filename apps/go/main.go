@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/handler"
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/middleware"
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/model"
 )
@@ -51,6 +52,8 @@ func main() {
 	}))
 
 	r.GET("/healthz", handleHealthz(pool))
+
+	handler.Auth(r, pool)
 
 	port := os.Getenv("GO_PORT")
 	if port == "" {
