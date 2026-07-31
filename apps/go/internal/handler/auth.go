@@ -65,7 +65,7 @@ func register(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusCreated, model.TokenResponse{Token: signed})
+		model.JSON(ctx, http.StatusCreated, model.TokenResponse{Token: signed})
 	}
 }
 
@@ -109,6 +109,6 @@ func login(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, model.TokenResponse{Token: signed})
+		model.JSON(ctx, http.StatusOK, model.TokenResponse{Token: signed})
 	}
 }

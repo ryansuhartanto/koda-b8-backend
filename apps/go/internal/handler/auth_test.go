@@ -26,7 +26,7 @@ func TestRegisterRejectsInvalidBody(t *testing.T) {
 		t.Errorf("status = %d, want %d", rec.Code, http.StatusBadRequest)
 	}
 
-	if got := rec.Header().Get("Content-Type"); got != "application/problem+json" {
-		t.Errorf("Content-Type = %q, want application/problem+json", got)
+	if got := rec.Header().Get("Content-Type"); got != "application/problem+json; charset=utf-8" {
+		t.Errorf("Content-Type = %q, want application/problem+json; charset=utf-8", got)
 	}
 }
