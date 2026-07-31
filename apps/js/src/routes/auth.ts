@@ -93,14 +93,18 @@ router.post("/auth/register", async (req, res) => {
 	try {
 		const passwordHash = await hash(password, 10);
 
-		const { rows } = await pool.query<{ id: string }>(
+		const { rows } = await pool.query<{ id: number }>(
 			"INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id",
 			[name, email, passwordHash],
 		);
 
 		const [user] = rows;
 
-		res.status(201).json({ token: sign(Number(user?.id)) });
+		if (user === undefined) {
+			throw new Error("insert returned no row");
+		}
+
+		res.status(201).json({ token: sign(user.id) });
 	} catch (error) {
 		// unique_violation
 		if ((error as { code?: string }).code === "23505") {
@@ -158,7 +162,7 @@ router.post("/auth/login", async (req, res) => {
 	}
 
 	try {
-		const { rows } = await pool.query<{ id: string; password_hash: string }>(
+		const { rows } = await pool.query<{ id: number; password_hash: string }>(
 			"SELECT id, password_hash FROM users WHERE email = $1 AND deleted_at IS NULL",
 			[email],
 		);
@@ -170,7 +174,7 @@ router.post("/auth/login", async (req, res) => {
 			return;
 		}
 
-		res.json({ token: sign(Number(user.id)) });
+		res.json({ token: sign(user.id) });
 	} catch (error) {
 		problem(res, 500, error);
 	}
