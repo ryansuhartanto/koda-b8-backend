@@ -60,7 +60,7 @@ title: BeliMudah
 ---
 erDiagram
 
-categories ||--o{ products       : "groups"
+categories |o--o{ products       : "groups"
 users      ||--o{ addresses      : "has"
 users      ||--o{ saved_payments : "has"
 users      ||--o{ cart_items     : "has"
