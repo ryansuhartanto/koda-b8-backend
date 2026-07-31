@@ -124,6 +124,25 @@ const docTemplate = `{
                 ],
                 "type": "object"
             },
+            "ShippingMethod": {
+                "properties": {
+                    "cost_idr": {
+                        "type": "integer"
+                    },
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "cost_idr",
+                    "id",
+                    "name"
+                ],
+                "type": "object"
+            },
             "TokenResponse": {
                 "properties": {
                     "token": {
@@ -469,6 +488,39 @@ const docTemplate = `{
                 "summary": "Fetch one product by slug",
                 "tags": [
                     "products"
+                ]
+            }
+        },
+        "/shipping-methods": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/ShippingMethod"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Problem"
+                                }
+                            }
+                        },
+                        "description": "Internal error"
+                    }
+                },
+                "summary": "List shipping methods and their cost",
+                "tags": [
+                    "shipping"
                 ]
             }
         }

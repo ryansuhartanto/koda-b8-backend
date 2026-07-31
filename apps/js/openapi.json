@@ -44,6 +44,25 @@
 					"status"
 				]
 			},
+			"ShippingMethod": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"name": {
+						"type": "string"
+					},
+					"cost_idr": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"cost_idr",
+					"id",
+					"name"
+				]
+			},
 			"Product": {
 				"type": "object",
 				"properties": {
@@ -178,6 +197,39 @@
 					},
 					"503": {
 						"description": "Database unreachable",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Problem"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/shipping-methods": {
+			"get": {
+				"summary": "List shipping methods and their cost",
+				"tags": [
+					"shipping"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ShippingMethod"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal error",
 						"content": {
 							"application/json": {
 								"schema": {

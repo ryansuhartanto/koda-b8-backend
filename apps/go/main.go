@@ -55,6 +55,7 @@ func main() {
 
 	handler.Auth(r, pool)
 	handler.Product(r, pool)
+	handler.Shipping(r, pool)
 
 	port := os.Getenv("GO_PORT")
 	if port == "" {

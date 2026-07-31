@@ -8,6 +8,7 @@ import { problem } from "#/lib/problem";
 import { cors } from "#/middleware/cors";
 import { router as auth } from "#/routes/auth";
 import { router as products } from "#/routes/products";
+import { router as shipping } from "#/routes/shipping";
 
 const app: Express = express();
 
@@ -23,6 +24,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
 
 app.use(auth);
 app.use(products);
+app.use(shipping);
 
 /**
  * @openapi
