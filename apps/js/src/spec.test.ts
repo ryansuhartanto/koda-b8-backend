@@ -1,7 +1,8 @@
 import { expect, test } from "vite-plus/test";
 
 import go from "../../go/docs/swagger.json" with { type: "json" };
-import js from "../openapi.json" with { type: "json" };
+// oxlint-disable-next-line no-relative-import-paths/no-relative-import-paths
+import js from "./docs/swagger.json" with { type: "json" };
 
 // swag stubs an empty externalDocs that no annotation suppresses
 function contract(spec: Record<string, unknown>): unknown {

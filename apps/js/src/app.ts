@@ -1,8 +1,9 @@
+import { fileURLToPath } from "node:url";
+
+import { apiReference } from "@scalar/express-api-reference";
 import express from "express";
 import type { Express } from "express";
-import swaggerUi from "swagger-ui-express";
 
-import { spec } from "#/docs";
 import { pool } from "#/lib/db";
 import { problem } from "#/lib/problem";
 import { cors } from "#/middleware/cors";
@@ -12,6 +13,9 @@ import { router as cart } from "#/routes/cart";
 import { router as orders } from "#/routes/orders";
 import { router as products } from "#/routes/products";
 import { router as shipping } from "#/routes/shipping";
+
+// oxlint-disable-next-line no-relative-import-paths/no-relative-import-paths
+import spec from "./docs/swagger.json" with { type: "json" };
 
 const app: Express = express();
 
@@ -23,7 +27,7 @@ app.get("/", (_req, res) => {
 	res.redirect(301, "/docs");
 });
 
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
+app.use("/docs", apiReference({ content: spec }));
 
 app.use(auth);
 app.use(products);

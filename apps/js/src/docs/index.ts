@@ -2,7 +2,7 @@ import { writeFile } from "node:fs/promises";
 
 import swaggerJSDoc from "swagger-jsdoc";
 
-export const spec: Record<string, unknown> = swaggerJSDoc({
+const spec: Record<string, unknown> = swaggerJSDoc({
 	failOnErrors: true,
 	definition: {
 		openapi: "3.1.0",
@@ -35,7 +35,7 @@ export const spec: Record<string, unknown> = swaggerJSDoc({
 			},
 		},
 	},
-	apis: [`${import.meta.dirname}/**/*.ts`],
+	apis: [`${import.meta.dirname}/../**/*.ts`],
 }) as Record<string, unknown>;
 
 // swagger-jsdoc always emits this; swag emits nothing
@@ -45,7 +45,7 @@ if (Array.isArray(spec["tags"]) && spec["tags"].length === 0) {
 
 if (import.meta.main) {
 	await writeFile(
-		new URL("../openapi.json", import.meta.url),
+		new URL("swagger.json", import.meta.url),
 		`${JSON.stringify(spec, null, "\t")}\n`,
 	);
 }
