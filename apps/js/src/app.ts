@@ -27,7 +27,13 @@ app.get("/", (_req, res) => {
 	res.redirect(301, "/docs");
 });
 
-app.use("/docs", apiReference({ content: spec }));
+app.use(
+	"/docs",
+	apiReference({
+		content: spec,
+		tagsSorter: "alpha",
+	}),
+);
 
 app.use(auth);
 app.use(products);
