@@ -39,7 +39,10 @@
 						"type": "string"
 					}
 				},
-				"required": ["title", "status"]
+				"required": [
+					"title",
+					"status"
+				]
 			},
 			"ShippingMethod": {
 				"type": "object",
@@ -54,7 +57,11 @@
 						"type": "integer"
 					}
 				},
-				"required": ["cost_idr", "id", "name"]
+				"required": [
+					"cost_idr",
+					"id",
+					"name"
+				]
 			},
 			"Product": {
 				"type": "object",
@@ -252,7 +259,11 @@
 						"type": "string"
 					}
 				},
-				"required": ["id_address", "payment_method", "ship_method"]
+				"required": [
+					"id_address",
+					"payment_method",
+					"ship_method"
+				]
 			},
 			"CartItem": {
 				"type": "object",
@@ -296,7 +307,10 @@
 						"minimum": 1
 					}
 				},
-				"required": ["id_product", "quantity"]
+				"required": [
+					"id_product",
+					"quantity"
+				]
 			},
 			"RegisterRequest": {
 				"type": "object",
@@ -312,7 +326,11 @@
 						"minLength": 8
 					}
 				},
-				"required": ["email", "name", "password"]
+				"required": [
+					"email",
+					"name",
+					"password"
+				]
 			},
 			"LoginRequest": {
 				"type": "object",
@@ -324,7 +342,10 @@
 						"type": "string"
 					}
 				},
-				"required": ["email", "password"]
+				"required": [
+					"email",
+					"password"
+				]
 			},
 			"TokenResponse": {
 				"type": "object",
@@ -333,7 +354,9 @@
 						"type": "string"
 					}
 				},
-				"required": ["token"]
+				"required": [
+					"token"
+				]
 			},
 			"Address": {
 				"type": "object",
@@ -422,7 +445,9 @@
 		"/healthz": {
 			"get": {
 				"summary": "Liveness and database reachability",
-				"tags": ["meta"],
+				"tags": [
+					"meta"
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -453,7 +478,9 @@
 		"/shipping-methods": {
 			"get": {
 				"summary": "List shipping methods and their cost",
-				"tags": ["shipping"],
+				"tags": [
+					"shipping"
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -484,7 +511,9 @@
 		"/products": {
 			"get": {
 				"summary": "List products",
-				"tags": ["products"],
+				"tags": [
+					"products"
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -516,7 +545,12 @@
 						"description": "One of newest, price_asc, price_desc, rating",
 						"schema": {
 							"type": "string",
-							"enum": ["newest", "price_asc", "price_desc", "rating"]
+							"enum": [
+								"newest",
+								"price_asc",
+								"price_desc",
+								"rating"
+							]
 						}
 					},
 					{
@@ -578,7 +612,9 @@
 		"/products/{slug}": {
 			"get": {
 				"summary": "Fetch one product by slug",
-				"tags": ["products"],
+				"tags": [
+					"products"
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -627,7 +663,9 @@
 		"/orders": {
 			"get": {
 				"summary": "List the caller's orders, newest first",
-				"tags": ["orders"],
+				"tags": [
+					"orders"
+				],
 				"security": [
 					{
 						"BearerAuth": []
@@ -671,7 +709,9 @@
 			},
 			"post": {
 				"summary": "Turn the caller's cart into an order",
-				"tags": ["orders"],
+				"tags": [
+					"orders"
+				],
 				"security": [
 					{
 						"BearerAuth": []
@@ -757,7 +797,9 @@
 		"/cart": {
 			"get": {
 				"summary": "List the caller's cart",
-				"tags": ["cart"],
+				"tags": [
+					"cart"
+				],
 				"security": [
 					{
 						"BearerAuth": []
@@ -801,7 +843,9 @@
 			},
 			"post": {
 				"summary": "Set the quantity of one cart line",
-				"tags": ["cart"],
+				"tags": [
+					"cart"
+				],
 				"security": [
 					{
 						"BearerAuth": []
@@ -870,7 +914,9 @@
 		"/cart/{id_product}": {
 			"delete": {
 				"summary": "Remove one product from the cart",
-				"tags": ["cart"],
+				"tags": [
+					"cart"
+				],
 				"security": [
 					{
 						"BearerAuth": []
@@ -927,7 +973,9 @@
 		"/auth/register": {
 			"post": {
 				"summary": "Register an account",
-				"tags": ["auth"],
+				"tags": [
+					"auth"
+				],
 				"requestBody": {
 					"description": "Credentials",
 					"required": true,
@@ -988,7 +1036,9 @@
 		"/auth/login": {
 			"post": {
 				"summary": "Exchange credentials for a token",
-				"tags": ["auth"],
+				"tags": [
+					"auth"
+				],
 				"requestBody": {
 					"description": "Credentials",
 					"required": true,
@@ -1049,7 +1099,9 @@
 		"/addresses": {
 			"get": {
 				"summary": "List the caller's addresses, default first",
-				"tags": ["addresses"],
+				"tags": [
+					"addresses"
+				],
 				"security": [
 					{
 						"BearerAuth": []
@@ -1093,7 +1145,9 @@
 			},
 			"post": {
 				"summary": "Add an address to the caller's account",
-				"tags": ["addresses"],
+				"tags": [
+					"addresses"
+				],
 				"security": [
 					{
 						"BearerAuth": []

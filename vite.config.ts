@@ -9,7 +9,12 @@ import pkg from "#/package.json" with { type: "json" };
 export default defineConfig({
 	fmt: {
 		...oxfmt,
-		ignorePatterns: ["aube-lock.yaml", "apps/go/docs", "apps/js/openapi.json"],
+		ignorePatterns: [
+			"aube-lock.yaml",
+			"apps/go/docs",
+			"apps/js/src/docs",
+			"!apps/js/src/docs/*.ts",
+		],
 	},
 	lint: {
 		extends: [oxlint],
