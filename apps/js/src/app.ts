@@ -1,5 +1,3 @@
-import { fileURLToPath } from "node:url";
-
 import { apiReference } from "@scalar/express-api-reference";
 import express from "express";
 import type { Express } from "express";
