@@ -12,8 +12,7 @@ import { router as orders } from "#/routes/orders";
 import { router as products } from "#/routes/products";
 import { router as shipping } from "#/routes/shipping";
 
-// oxlint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import spec from "./docs/swagger.json" with { type: "json" };
+import spec from "../docs/swagger.json" with { type: "json" };
 
 const app: Express = express();
 

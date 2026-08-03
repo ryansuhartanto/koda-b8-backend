@@ -60,7 +60,7 @@ dir = "apps/go"
 run = "go tool swag init --v3.1"
 
 [tasks."docs:js"]
-run = "node apps/js/src/docs/index.ts"
+run = "aube --dir apps/js run docs"
 
 [tasks."db:create"]
 usage = 'arg "<name>"'

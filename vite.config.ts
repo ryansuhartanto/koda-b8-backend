@@ -12,8 +12,8 @@ export default defineConfig({
 		ignorePatterns: [
 			"aube-lock.yaml",
 			"apps/go/docs",
-			"apps/js/src/docs",
-			"!apps/js/src/docs/*.ts",
+			"apps/js/docs",
+			"!apps/js/docs/*.ts",
 		],
 	},
 	lint: {

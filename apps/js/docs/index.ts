@@ -35,7 +35,7 @@ const spec: Record<string, unknown> = swaggerJSDoc({
 			},
 		},
 	},
-	apis: [`${import.meta.dirname}/../**/*.ts`],
+	apis: [`${import.meta.dirname}/../src/**/*.ts`],
 }) as Record<string, unknown>;
 
 // swagger-jsdoc always emits this; swag emits nothing
