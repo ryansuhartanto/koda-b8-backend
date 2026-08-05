@@ -11,17 +11,12 @@ import (
 
 func CartItems(ctx context.Context, pool *pgxpool.Pool, codec *sqid.Codec, idUser int64) ([]model.CartItem, error) {
 	rows, err := pool.Query(ctx,
-		`SELECT ci.id_variant, p.id, p.name, pv.name, COALESCE((
-			SELECT pi.url FROM products_images pi
-			WHERE pi.id_product = p.id AND (pi.id_variant = pv.id OR pi.id_variant IS NULL)
-			ORDER BY pi.id_variant NULLS LAST, pi.id ASC LIMIT 1
-		), ''), pp.price_idr, ci.quantity
-		FROM cart_items ci
-		JOIN products_variants pv ON pv.id = ci.id_variant AND pv.deleted_at IS NULL
-		JOIN products p ON p.id = pv.id_product AND p.deleted_at IS NULL
-		JOIN products_price pp ON pp.id_variant = pv.id
-		WHERE ci.id_user = $1
-		ORDER BY ci.created_at, ci.id_variant`, idUser)
+		`SELECT id_variant, id_product, name, name_variant,
+			COALESCE(img_url, ''), COALESCE(img_alt, ''),
+			price_idr, original_price_idr, quantity
+		FROM cart_lines
+		WHERE id_user = $1
+		ORDER BY created_at, id_variant`, idUser)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +31,8 @@ func CartItems(ctx context.Context, pool *pgxpool.Pool, codec *sqid.Codec, idUse
 			idProduct int64
 		)
 
-		if err := rows.Scan(&idVariant, &idProduct, &item.Name, &item.VariantName, &item.Img, &item.PriceIdr, &item.Quantity); err != nil {
+		if err := rows.Scan(&idVariant, &idProduct, &item.Name, &item.NameVariant,
+			&item.ImgURL, &item.ImgAlt, &item.PriceIdr, &item.OriginalPriceIdr, &item.Quantity); err != nil {
 			return nil, err
 		}
 

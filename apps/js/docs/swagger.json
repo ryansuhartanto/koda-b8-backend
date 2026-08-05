@@ -300,13 +300,19 @@
 					"name": {
 						"type": "string"
 					},
-					"variant_name": {
+					"name_variant": {
 						"type": "string"
 					},
-					"img": {
+					"img_url": {
+						"type": "string"
+					},
+					"img_alt": {
 						"type": "string"
 					},
 					"price_idr": {
+						"type": "integer"
+					},
+					"original_price_idr": {
 						"type": "integer"
 					},
 					"quantity": {
@@ -315,12 +321,14 @@
 				},
 				"required": [
 					"id_variant",
-					"img",
+					"img_alt",
+					"img_url",
 					"name",
+					"name_variant",
+					"original_price_idr",
 					"path",
 					"price_idr",
-					"quantity",
-					"variant_name"
+					"quantity"
 				]
 			},
 			"CartRequest": {

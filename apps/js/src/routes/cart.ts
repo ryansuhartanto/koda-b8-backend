@@ -2,21 +2,23 @@ import { Router } from "express";
 
 import { pool } from "#/lib/db";
 import { problem } from "#/lib/problem";
+import { decode, encode, productPath } from "#/lib/sqid";
 import { auth } from "#/middleware/auth";
-import type { CartItem, CartRequest } from "#/model/cart";
+import type { CartItem, CartItemRow, CartRequest } from "#/model/cart";
 
 function toCartRequest(body: unknown): CartRequest | undefined {
-	const { id_product, quantity } = (body ?? {}) as Record<string, unknown>;
+	const { id_variant, quantity } = (body ?? {}) as Record<string, unknown>;
 
 	if (
-		!Number.isInteger(id_product) ||
+		typeof id_variant !== "string" ||
+		id_variant === "" ||
 		!Number.isInteger(quantity) ||
 		(quantity as number) < 1
 	) {
 		return undefined;
 	}
 
-	return { id_product: id_product as number, quantity: quantity as number };
+	return { id_variant, quantity: quantity as number };
 }
 
 export const router: Router = Router();
@@ -28,19 +30,24 @@ export const router: Router = Router();
  *     CartItem:
  *       type: object
  *       properties:
- *         id_product: { type: integer }
- *         slug: { type: string }
+ *         id_variant: { type: string }
+ *         path: { type: string }
  *         name: { type: string }
- *         img: { type: string }
+ *         name_variant: { type: string }
+ *         img_url: { type: string }
+ *         img_alt: { type: string }
  *         price_idr: { type: integer }
+ *         original_price_idr: { type: integer }
  *         quantity: { type: integer }
- *       required: [id_product, img, name, price_idr, quantity, slug]
+ *       required:
+ *         [id_variant, img_alt, img_url, name, name_variant,
+ *          original_price_idr, path, price_idr, quantity]
  *     CartRequest:
  *       type: object
  *       properties:
- *         id_product: { type: integer }
+ *         id_variant: { type: string }
  *         quantity: { type: integer, minimum: 1 }
- *       required: [id_product, quantity]
+ *       required: [id_variant, quantity]
  *
  * /cart:
  *   get:
@@ -90,7 +97,7 @@ export const router: Router = Router();
  *           application/json:
  *             schema: { $ref: "#/components/schemas/Problem" }
  *       "404":
- *         description: No such product
+ *         description: No such variant
  *         content:
  *           application/json:
  *             schema: { $ref: "#/components/schemas/Problem" }
@@ -102,16 +109,27 @@ export const router: Router = Router();
  */
 router.get("/cart", auth, async (req, res) => {
 	try {
-		const { rows } = await pool.query<CartItem>(
-			`SELECT ci.id_product, p.slug, p.name, COALESCE(p.img, '') AS img, p.price_idr, ci.quantity
-			FROM cart_items ci
-			JOIN products p ON p.id = ci.id_product AND p.deleted_at IS NULL
-			WHERE ci.id_user = $1
-			ORDER BY ci.created_at, ci.id_product`,
+		const { rows } = await pool.query<CartItemRow>(
+			`SELECT id_variant, id_product, name, name_variant,
+				COALESCE(img_url, '') AS img_url, COALESCE(img_alt, '') AS img_alt,
+				price_idr, original_price_idr, quantity
+			FROM cart_lines
+			WHERE id_user = $1
+			ORDER BY created_at, id_variant`,
 			[req.idUser],
 		);
 
-		const items: CartItem[] = rows;
+		const items: CartItem[] = rows.map((row) => ({
+			id_variant: encode(row.id_variant),
+			path: productPath(encode(row.id_product), row.name),
+			name: row.name,
+			name_variant: row.name_variant,
+			img_url: row.img_url,
+			img_alt: row.img_alt,
+			price_idr: row.price_idr,
+			original_price_idr: row.original_price_idr,
+			quantity: row.quantity,
+		}));
 
 		res.json(items);
 	} catch (error) {
@@ -123,22 +141,32 @@ router.post("/cart", auth, async (req, res) => {
 	const body = toCartRequest(req.body);
 
 	if (body === undefined) {
-		problem(res, 400, "id_product and a quantity of at least 1 are required");
+		problem(res, 400, "id_variant and a quantity of at least 1 are required");
+		return;
+	}
+
+	const idVariant = decode(body.id_variant);
+
+	if (idVariant === undefined) {
+		problem(res, 404, "no such variant");
 		return;
 	}
 
 	try {
-		// SELECT rather than a literal id, so a soft-deleted product is rejected with no
+		// SELECT rather than a literal id, so a soft-deleted variant is rejected with no
 		// check-then-insert window
 		const { rowCount } = await pool.query(
-			`INSERT INTO cart_items (id_user, id_product, quantity)
-			SELECT $1, p.id, $3 FROM products p WHERE p.id = $2 AND p.deleted_at IS NULL
-			ON CONFLICT (id_user, id_product) DO UPDATE SET quantity = EXCLUDED.quantity`,
-			[req.idUser, body.id_product, body.quantity],
+			`INSERT INTO cart_items (id_user, id_variant, quantity)
+			SELECT $1, pv.id, $3
+			FROM products_variants pv
+			JOIN products p ON p.id = pv.id_product AND p.deleted_at IS NULL
+			WHERE pv.id = $2 AND pv.deleted_at IS NULL
+			ON CONFLICT (id_user, id_variant) DO UPDATE SET quantity = EXCLUDED.quantity`,
+			[req.idUser, idVariant, body.quantity],
 		);
 
 		if (rowCount === 0) {
-			problem(res, 404, "no such product");
+			problem(res, 404, "no such variant");
 			return;
 		}
 
@@ -150,25 +178,20 @@ router.post("/cart", auth, async (req, res) => {
 
 /**
  * @openapi
- * /cart/{id_product}:
+ * /cart/{id_variant}:
  *   delete:
- *     summary: Remove one product from the cart
+ *     summary: Remove one variant from the cart
  *     tags: [cart]
  *     security: [{ BearerAuth: [] }]
  *     parameters:
  *       - in: path
- *         name: id_product
+ *         name: id_variant
  *         required: true
- *         description: Product id
- *         schema: { type: integer }
+ *         description: Variant sqid
+ *         schema: { type: string }
  *     responses:
  *       "204":
  *         description: No Content
- *       "400":
- *         description: Invalid product id
- *         content:
- *           application/json:
- *             schema: { $ref: "#/components/schemas/Problem" }
  *       "401":
  *         description: Missing or invalid token
  *         content:
@@ -180,20 +203,21 @@ router.post("/cart", auth, async (req, res) => {
  *           application/json:
  *             schema: { $ref: "#/components/schemas/Problem" }
  */
-router.delete("/cart/:id_product", auth, async (req, res) => {
-	const raw = req.params["id_product"];
-	const idProduct = typeof raw === "string" ? raw : "";
+router.delete("/cart/:id_variant", auth, async (req, res) => {
+	const raw = req.params["id_variant"];
+	const idVariant = decode(typeof raw === "string" ? raw : "");
 
-	if (!/^-?\d+$/.test(idProduct)) {
-		problem(res, 400, "id_product must be an integer");
+	// no 400 branch, because removing something that cannot exist is still a removal
+	if (idVariant === undefined) {
+		res.sendStatus(204);
 		return;
 	}
 
 	try {
 		// no 404 branch, because DELETE is idempotent
 		await pool.query(
-			"DELETE FROM cart_items WHERE id_user = $1 AND id_product = $2",
-			[req.idUser, Number(idProduct)],
+			"DELETE FROM cart_items WHERE id_user = $1 AND id_variant = $2",
+			[req.idUser, idVariant],
 		);
 
 		res.sendStatus(204);

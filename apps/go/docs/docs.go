@@ -94,11 +94,20 @@ const docTemplate = `{
                     "id_variant": {
                         "type": "string"
                     },
-                    "img": {
+                    "img_alt": {
+                        "type": "string"
+                    },
+                    "img_url": {
                         "type": "string"
                     },
                     "name": {
                         "type": "string"
+                    },
+                    "name_variant": {
+                        "type": "string"
+                    },
+                    "original_price_idr": {
+                        "type": "integer"
                     },
                     "path": {
                         "type": "string"
@@ -108,19 +117,18 @@ const docTemplate = `{
                     },
                     "quantity": {
                         "type": "integer"
-                    },
-                    "variant_name": {
-                        "type": "string"
                     }
                 },
                 "required": [
                     "id_variant",
-                    "img",
+                    "img_alt",
+                    "img_url",
                     "name",
+                    "name_variant",
+                    "original_price_idr",
                     "path",
                     "price_idr",
-                    "quantity",
-                    "variant_name"
+                    "quantity"
                 ],
                 "type": "object"
             },
