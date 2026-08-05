@@ -63,16 +63,49 @@
 					"name"
 				]
 			},
+			"ProductVariant": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"inventory": {
+						"type": "integer"
+					},
+					"price_idr": {
+						"type": "integer"
+					},
+					"original_price_idr": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"id",
+					"inventory",
+					"name",
+					"original_price_idr",
+					"price_idr"
+				]
+			},
 			"Product": {
 				"type": "object",
 				"properties": {
 					"id": {
-						"type": "integer"
+						"type": "string"
 					},
-					"slug": {
+					"path": {
 						"type": "string"
 					},
 					"name": {
+						"type": "string"
+					},
+					"description": {
 						"type": "string"
 					},
 					"brand": {
@@ -81,10 +114,10 @@
 					"category": {
 						"type": "string"
 					},
-					"img": {
+					"img_url": {
 						"type": "string"
 					},
-					"summary": {
+					"img_alt": {
 						"type": "string"
 					},
 					"price_idr": {
@@ -93,7 +126,7 @@
 					"original_price_idr": {
 						"type": "integer"
 					},
-					"stock": {
+					"inventory": {
 						"type": "integer"
 					},
 					"rating": {
@@ -102,10 +135,10 @@
 					"rating_count": {
 						"type": "integer"
 					},
-					"tags": {
+					"variants": {
 						"type": "array",
 						"items": {
-							"type": "string"
+							"$ref": "#/components/schemas/ProductVariant"
 						},
 						"uniqueItems": false
 					}
@@ -114,16 +147,15 @@
 					"brand",
 					"category",
 					"id",
-					"img",
+					"img_alt",
+					"img_url",
+					"inventory",
 					"name",
 					"original_price_idr",
+					"path",
 					"price_idr",
 					"rating",
-					"rating_count",
-					"slug",
-					"stock",
-					"summary",
-					"tags"
+					"rating_count"
 				]
 			},
 			"OrderItem": {
@@ -132,10 +164,13 @@
 					"id": {
 						"type": "integer"
 					},
-					"id_product": {
-						"type": "integer"
+					"id_variant": {
+						"type": "string"
 					},
 					"product_name": {
+						"type": "string"
+					},
+					"variant_name": {
 						"type": "string"
 					},
 					"unit_price_idr": {
@@ -147,10 +182,10 @@
 				},
 				"required": [
 					"id",
-					"id_product",
 					"product_name",
 					"quantity",
-					"unit_price_idr"
+					"unit_price_idr",
+					"variant_name"
 				]
 			},
 			"Order": {
@@ -195,15 +230,6 @@
 					"ship_address": {
 						"type": "string"
 					},
-					"ship_city": {
-						"type": "string"
-					},
-					"ship_province": {
-						"type": "string"
-					},
-					"ship_postal_code": {
-						"type": "string"
-					},
 					"ship_method": {
 						"type": "string"
 					},
@@ -226,15 +252,12 @@
 					"payment_method",
 					"promo_code",
 					"ship_address",
-					"ship_city",
 					"ship_cost_idr",
 					"ship_email",
 					"ship_method",
 					"ship_name",
 					"ship_note",
 					"ship_phone",
-					"ship_postal_code",
-					"ship_province",
 					"status",
 					"subtotal_idr",
 					"total_idr"
@@ -268,13 +291,16 @@
 			"CartItem": {
 				"type": "object",
 				"properties": {
-					"id_product": {
-						"type": "integer"
+					"id_variant": {
+						"type": "string"
 					},
-					"slug": {
+					"path": {
 						"type": "string"
 					},
 					"name": {
+						"type": "string"
+					},
+					"variant_name": {
 						"type": "string"
 					},
 					"img": {
@@ -288,19 +314,20 @@
 					}
 				},
 				"required": [
-					"id_product",
+					"id_variant",
 					"img",
 					"name",
+					"path",
 					"price_idr",
 					"quantity",
-					"slug"
+					"variant_name"
 				]
 			},
 			"CartRequest": {
 				"type": "object",
 				"properties": {
-					"id_product": {
-						"type": "integer"
+					"id_variant": {
+						"type": "string"
 					},
 					"quantity": {
 						"type": "integer",
@@ -308,7 +335,7 @@
 					}
 				},
 				"required": [
-					"id_product",
+					"id_variant",
 					"quantity"
 				]
 			},
@@ -533,8 +560,8 @@
 					},
 					{
 						"in": "query",
-						"name": "tag",
-						"description": "One of baru, unggulan, promo",
+						"name": "brand",
+						"description": "Brand name",
 						"schema": {
 							"type": "string"
 						}
@@ -609,18 +636,26 @@
 				}
 			}
 		},
-		"/products/{slug}": {
+		"/products/{sqid}/{slug}": {
 			"get": {
-				"summary": "Fetch one product by slug",
+				"summary": "Fetch one product",
 				"tags": [
 					"products"
 				],
 				"parameters": [
 					{
 						"in": "path",
-						"name": "slug",
+						"name": "sqid",
 						"required": true,
-						"description": "Product slug",
+						"description": "Product sqid",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "slug",
+						"description": "Decorative slug, ignored when resolving and corrected by redirect",
 						"schema": {
 							"type": "string"
 						}
@@ -633,6 +668,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Product"
+								}
+							}
+						}
+					},
+					"302": {
+						"description": "Slug is absent or stale",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
 								}
 							}
 						}
@@ -889,7 +934,7 @@
 						}
 					},
 					"404": {
-						"description": "No such product",
+						"description": "No such variant",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -911,9 +956,9 @@
 				}
 			}
 		},
-		"/cart/{id_product}": {
+		"/cart/{id_variant}": {
 			"delete": {
-				"summary": "Remove one product from the cart",
+				"summary": "Remove one variant from the cart",
 				"tags": [
 					"cart"
 				],
@@ -925,27 +970,17 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "id_product",
+						"name": "id_variant",
 						"required": true,
-						"description": "Product id",
+						"description": "Variant sqid",
 						"schema": {
-							"type": "integer"
+							"type": "string"
 						}
 					}
 				],
 				"responses": {
 					"204": {
 						"description": "No Content"
-					},
-					"400": {
-						"description": "Invalid product id",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Problem"
-								}
-							}
-						}
 					},
 					"401": {
 						"description": "Missing or invalid token",

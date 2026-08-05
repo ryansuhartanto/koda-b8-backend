@@ -1,15 +1,31 @@
-export type Product = {
-	id: number;
-	slug: string;
+export type ProductVariant = {
+	id: string;
 	name: string;
-	brand: string;
-	category: string;
-	img: string;
-	summary: string;
+	description?: string;
+	inventory: number;
 	price_idr: number;
 	original_price_idr: number;
-	stock: number;
+};
+
+export type Product = {
+	id: string;
+	path: string;
+	name: string;
+	description?: string;
+	brand: string;
+	category: string;
+	img_url: string;
+	img_alt: string;
+	price_idr: number;
+	original_price_idr: number;
+	inventory: number;
 	rating: number;
 	rating_count: number;
-	tags: string[];
+	variants?: ProductVariant[];
 };
+
+export type ProductRow = Omit<Product, "id" | "path" | "variants"> & {
+	id: number;
+};
+
+export type ProductVariantRow = Omit<ProductVariant, "id"> & { id: number };
