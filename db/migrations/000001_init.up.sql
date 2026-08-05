@@ -11,10 +11,25 @@ CREATE TABLE users (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ,
 
-    role user_role NOT NULL DEFAULT 'customer',
-
     email VARCHAR NOT NULL,
-    password_hash VARCHAR NOT NULL,
+    password_hash VARCHAR NOT NULL
+);
+
+CREATE UNIQUE INDEX users_email_key ON users (email) WHERE deleted_at IS NULL;
+
+CREATE TABLE roles (
+    id_user BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    role user_role NOT NULL,
+    PRIMARY KEY (id_user, role),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ
+);
+
+CREATE TABLE profile (
+    id_user BIGINT PRIMARY KEY REFERENCES users (id) ON DELETE CASCADE,
+
     name VARCHAR NOT NULL,
 
     phone VARCHAR,
@@ -22,9 +37,6 @@ CREATE TABLE users (
     gender gender,
     avatar VARCHAR
 );
-
--- partial unique: a soft-deleted row must not block reuse of its email
-CREATE UNIQUE INDEX users_email_key ON users (email) WHERE deleted_at IS NULL;
 
 CREATE TABLE categories (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -40,6 +52,18 @@ CREATE TABLE categories (
 
 CREATE UNIQUE INDEX categories_name_key ON categories (name) WHERE deleted_at IS NULL;
 
+CREATE TABLE brands (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ,
+
+    name VARCHAR NOT NULL
+);
+
+CREATE UNIQUE INDEX brands_name_key ON brands (name) WHERE deleted_at IS NULL;
+
 CREATE TABLE products (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
@@ -48,31 +72,75 @@ CREATE TABLE products (
     deleted_at TIMESTAMPTZ,
 
     id_category BIGINT REFERENCES categories (id),
+    id_brand BIGINT REFERENCES brands (id),
 
-    slug VARCHAR NOT NULL,
     name VARCHAR NOT NULL,
-    brand VARCHAR,
-    img VARCHAR,
-    summary VARCHAR,
-
-    price_idr BIGINT NOT NULL,
-    original_price_idr BIGINT,
-    stock INT NOT NULL DEFAULT 0,
-
-    rating NUMERIC(2, 1) NOT NULL DEFAULT 0,
-    rating_count INT NOT NULL DEFAULT 0,
-
-    tags TEXT[] NOT NULL DEFAULT '{}'
+    description VARCHAR
 );
 
-CREATE UNIQUE INDEX products_slug_key ON products (slug) WHERE deleted_at IS NULL;
-
-CREATE INDEX products_tags_idx ON products USING GIN (tags);
-
--- REFERENCES indexes neither side of the constraint, so every FK column is indexed by hand
 CREATE INDEX products_id_category_idx ON products (id_category);
 
-CREATE TABLE addresses (
+CREATE INDEX products_id_brand_idx ON products (id_brand);
+
+CREATE TABLE products_variants (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ,
+
+    id_product BIGINT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+    position INT NOT NULL DEFAULT 0,
+
+    inventory INT NOT NULL DEFAULT 0 CHECK (inventory >= 0),
+
+    name VARCHAR NOT NULL,
+    description VARCHAR
+);
+
+CREATE INDEX products_variants_id_product_idx ON products_variants (id_product);
+
+CREATE TABLE products_images (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+    id_product BIGINT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+    id_variant BIGINT REFERENCES products_variants (id) ON DELETE CASCADE,
+
+    url VARCHAR NOT NULL,
+    alt VARCHAR
+);
+
+CREATE INDEX products_images_id_product_idx ON products_images (id_product);
+
+CREATE INDEX products_images_id_variant_idx ON products_images (id_variant);
+
+CREATE TABLE products_price (
+    id_variant BIGINT PRIMARY KEY REFERENCES products_variants (id) ON DELETE CASCADE,
+
+    original_price_idr BIGINT NOT NULL,
+    discount_price_idr BIGINT CHECK (discount_price_idr < original_price_idr),
+    price_idr BIGINT NOT NULL GENERATED ALWAYS AS (COALESCE(discount_price_idr, original_price_idr)) STORED
+);
+
+CREATE TABLE ratings (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ,
+
+    id_user BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    id_product BIGINT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    description VARCHAR
+);
+
+CREATE UNIQUE INDEX ratings_id_user_id_product_key ON ratings (id_user, id_product) WHERE deleted_at IS NULL;
+
+CREATE INDEX ratings_id_product_idx ON ratings (id_product);
+
+CREATE TABLE saved_address (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -91,7 +159,7 @@ CREATE TABLE addresses (
     is_default BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE INDEX addresses_id_user_idx ON addresses (id_user);
+CREATE INDEX saved_address_id_user_idx ON saved_address (id_user);
 
 CREATE TABLE saved_payments (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -159,15 +227,12 @@ CREATE TABLE orders (
     discount_idr BIGINT NOT NULL DEFAULT 0,
     subtotal_idr BIGINT NOT NULL,
     ship_cost_idr BIGINT NOT NULL DEFAULT 0,
-    total_idr BIGINT NOT NULL,
+    total_idr BIGINT NOT NULL GENERATED ALWAYS AS (subtotal_idr - discount_idr + ship_cost_idr) STORED,
 
     ship_name VARCHAR NOT NULL,
     ship_phone VARCHAR NOT NULL,
     ship_email VARCHAR NOT NULL,
     ship_address VARCHAR NOT NULL,
-    ship_city VARCHAR NOT NULL,
-    ship_province VARCHAR NOT NULL,
-    ship_postal_code VARCHAR NOT NULL,
     ship_method VARCHAR NOT NULL,
     ship_note VARCHAR
 );
@@ -207,16 +272,32 @@ CREATE TRIGGER users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
+CREATE TRIGGER roles_updated_at
+BEFORE UPDATE ON roles
+FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+
 CREATE TRIGGER categories_updated_at
 BEFORE UPDATE ON categories
+FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+
+CREATE TRIGGER brands_updated_at
+BEFORE UPDATE ON brands
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
 CREATE TRIGGER products_updated_at
 BEFORE UPDATE ON products
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
-CREATE TRIGGER addresses_updated_at
-BEFORE UPDATE ON addresses
+CREATE TRIGGER products_variants_updated_at
+BEFORE UPDATE ON products_variants
+FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+
+CREATE TRIGGER ratings_updated_at
+BEFORE UPDATE ON ratings
+FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+
+CREATE TRIGGER saved_address_updated_at
+BEFORE UPDATE ON saved_address
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
 CREATE TRIGGER saved_payments_updated_at

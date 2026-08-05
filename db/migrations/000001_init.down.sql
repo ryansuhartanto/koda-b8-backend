@@ -10,11 +10,25 @@ DROP TABLE cart_items;
 
 DROP TABLE saved_payments;
 
-DROP TABLE addresses;
+DROP TABLE saved_address;
+
+DROP TABLE ratings;
+
+DROP TABLE products_price;
+
+DROP TABLE products_images;
+
+DROP TABLE products_variants;
 
 DROP TABLE products;
 
+DROP TABLE brands;
+
 DROP TABLE categories;
+
+DROP TABLE profile;
+
+DROP TABLE roles;
 
 DROP TABLE users;
 
