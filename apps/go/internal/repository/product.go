@@ -35,8 +35,7 @@ const productColumns = `
 	p.price_idr, p.original_price_idr,
 	p.inventory,
 	COALESCE(p.rating, 0)::FLOAT, p.rating_count
-FROM products_summary p
-WHERE TRUE`
+FROM products_summary p`
 
 func scanProduct(row pgx.Row, codec *sqid.Codec) (model.Product, error) {
 	var (
@@ -69,20 +68,25 @@ func Products(ctx context.Context, pool *pgxpool.Pool, codec *sqid.Codec, filter
 	query.WriteString("SELECT" + productColumns)
 
 	args := []any{}
+	where := []string{}
 
 	if filter.Search != "" {
 		args = append(args, filter.Search)
-		fmt.Fprintf(&query, " AND p.name ILIKE '%%' || $%d || '%%'", len(args))
+		where = append(where, fmt.Sprintf("p.name ILIKE '%%' || $%d || '%%'", len(args)))
 	}
 
 	if filter.Category != "" {
 		args = append(args, filter.Category)
-		fmt.Fprintf(&query, " AND p.category = $%d", len(args))
+		where = append(where, fmt.Sprintf("p.category = $%d", len(args)))
 	}
 
 	if filter.Brand != "" {
 		args = append(args, filter.Brand)
-		fmt.Fprintf(&query, " AND p.brand = $%d", len(args))
+		where = append(where, fmt.Sprintf("p.brand = $%d", len(args)))
+	}
+
+	if len(where) > 0 {
+		query.WriteString(" WHERE " + strings.Join(where, " AND "))
 	}
 
 	args = append(args, filter.Limit, filter.Offset)
@@ -109,7 +113,7 @@ func Products(ctx context.Context, pool *pgxpool.Pool, codec *sqid.Codec, filter
 }
 
 func ProductByID(ctx context.Context, pool *pgxpool.Pool, codec *sqid.Codec, id int64) (model.Product, error) {
-	p, err := scanProduct(pool.QueryRow(ctx, "SELECT"+productColumns+" AND p.id = $1", id), codec)
+	p, err := scanProduct(pool.QueryRow(ctx, "SELECT"+productColumns+" WHERE p.id = $1", id), codec)
 	if err != nil {
 		return p, err
 	}

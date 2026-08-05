@@ -30,8 +30,7 @@ const columns = `
 	p.price_idr, p.original_price_idr,
 	p.inventory,
 	COALESCE(p.rating, 0)::FLOAT AS rating, p.rating_count
-FROM products_summary p
-WHERE TRUE`;
+FROM products_summary p`;
 
 function intQuery(
 	raw: unknown,
@@ -181,24 +180,26 @@ router.get("/products", async (req, res) => {
 
 	if (typeof search === "string" && search !== "") {
 		args.push(search);
-		filters.push(`AND p.name ILIKE '%' || $${args.length} || '%'`);
+		filters.push(`p.name ILIKE '%' || $${args.length} || '%'`);
 	}
 
 	if (typeof category === "string" && category !== "") {
 		args.push(category);
-		filters.push(`AND p.category = $${args.length}`);
+		filters.push(`p.category = $${args.length}`);
 	}
 
 	if (typeof brand === "string" && brand !== "") {
 		args.push(brand);
-		filters.push(`AND p.brand = $${args.length}`);
+		filters.push(`p.brand = $${args.length}`);
 	}
+
+	const where = filters.length > 0 ? `WHERE ${filters.join(" AND ")}` : "";
 
 	args.push(limit, offset);
 
 	try {
 		const { rows } = await pool.query<ProductRow>(
-			`SELECT ${columns} ${filters.join(" ")} ORDER BY ${sorts[sort]} LIMIT $${args.length - 1} OFFSET $${args.length}`,
+			`SELECT ${columns} ${where} ORDER BY ${sorts[sort]} LIMIT $${args.length - 1} OFFSET $${args.length}`,
 			args,
 		);
 
@@ -262,7 +263,7 @@ async function productBySqid(
 
 	try {
 		const { rows } = await pool.query<ProductRow>(
-			`SELECT ${columns} AND p.id = $1`,
+			`SELECT ${columns} WHERE p.id = $1`,
 			[id],
 		);
 
