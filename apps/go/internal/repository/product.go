@@ -86,7 +86,8 @@ func Products(ctx context.Context, pool *pgxpool.Pool, codec *sqid.Codec, filter
 	}
 
 	if len(where) > 0 {
-		query.WriteString(" WHERE " + strings.Join(where, " AND "))
+		query.WriteString(" WHERE ")
+		query.WriteString(strings.Join(where, " AND "))
 	}
 
 	args = append(args, filter.Limit, filter.Offset)
