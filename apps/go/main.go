@@ -13,6 +13,7 @@ import (
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/handler"
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/middleware"
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/model"
+	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/sqid"
 )
 
 // @title       BeliMudah API
@@ -37,6 +38,11 @@ func main() {
 	}
 	defer pool.Close()
 
+	codec, err := sqid.New(os.Getenv("SQIDS_ALPHABET"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	r := gin.Default()
 
 	r.Use(middleware.Cors())
@@ -54,11 +60,11 @@ func main() {
 	r.GET("/healthz", handleHealthz(pool))
 
 	handler.Auth(r, pool)
-	handler.Product(r, pool)
+	handler.Product(r, pool, codec)
 	handler.Shipping(r, pool)
-	handler.Cart(r, pool)
+	handler.Cart(r, pool, codec)
 	handler.Address(r, pool)
-	handler.Order(r, pool)
+	handler.Order(r, pool, codec)
 
 	port := os.Getenv("GO_PORT")
 	if port == "" {

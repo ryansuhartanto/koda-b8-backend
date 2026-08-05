@@ -91,13 +91,16 @@ const docTemplate = `{
             },
             "CartItem": {
                 "properties": {
-                    "id_product": {
-                        "type": "integer"
+                    "id_variant": {
+                        "type": "string"
                     },
                     "img": {
                         "type": "string"
                     },
                     "name": {
+                        "type": "string"
+                    },
+                    "path": {
                         "type": "string"
                     },
                     "price_idr": {
@@ -106,24 +109,25 @@ const docTemplate = `{
                     "quantity": {
                         "type": "integer"
                     },
-                    "slug": {
+                    "variant_name": {
                         "type": "string"
                     }
                 },
                 "required": [
-                    "id_product",
+                    "id_variant",
                     "img",
                     "name",
+                    "path",
                     "price_idr",
                     "quantity",
-                    "slug"
+                    "variant_name"
                 ],
                 "type": "object"
             },
             "CartRequest": {
                 "properties": {
-                    "id_product": {
-                        "type": "integer"
+                    "id_variant": {
+                        "type": "string"
                     },
                     "quantity": {
                         "minimum": 1,
@@ -131,7 +135,7 @@ const docTemplate = `{
                     }
                 },
                 "required": [
-                    "id_product",
+                    "id_variant",
                     "quantity"
                 ],
                 "type": "object"
@@ -178,9 +182,6 @@ const docTemplate = `{
                     "ship_address": {
                         "type": "string"
                     },
-                    "ship_city": {
-                        "type": "string"
-                    },
                     "ship_cost_idr": {
                         "type": "integer"
                     },
@@ -197,12 +198,6 @@ const docTemplate = `{
                         "type": "string"
                     },
                     "ship_phone": {
-                        "type": "string"
-                    },
-                    "ship_postal_code": {
-                        "type": "string"
-                    },
-                    "ship_province": {
                         "type": "string"
                     },
                     "status": {
@@ -223,15 +218,12 @@ const docTemplate = `{
                     "payment_method",
                     "promo_code",
                     "ship_address",
-                    "ship_city",
                     "ship_cost_idr",
                     "ship_email",
                     "ship_method",
                     "ship_name",
                     "ship_note",
                     "ship_phone",
-                    "ship_postal_code",
-                    "ship_province",
                     "status",
                     "subtotal_idr",
                     "total_idr"
@@ -243,8 +235,8 @@ const docTemplate = `{
                     "id": {
                         "type": "integer"
                     },
-                    "id_product": {
-                        "type": "integer"
+                    "id_variant": {
+                        "type": "string"
                     },
                     "product_name": {
                         "type": "string"
@@ -254,14 +246,17 @@ const docTemplate = `{
                     },
                     "unit_price_idr": {
                         "type": "integer"
+                    },
+                    "variant_name": {
+                        "type": "string"
                     }
                 },
                 "required": [
                     "id",
-                    "id_product",
                     "product_name",
                     "quantity",
-                    "unit_price_idr"
+                    "unit_price_idr",
+                    "variant_name"
                 ],
                 "type": "object"
             },
@@ -316,17 +311,29 @@ const docTemplate = `{
                     "category": {
                         "type": "string"
                     },
-                    "id": {
-                        "type": "integer"
-                    },
-                    "img": {
+                    "description": {
                         "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "img_alt": {
+                        "type": "string"
+                    },
+                    "img_url": {
+                        "type": "string"
+                    },
+                    "inventory": {
+                        "type": "integer"
                     },
                     "name": {
                         "type": "string"
                     },
                     "original_price_idr": {
                         "type": "integer"
+                    },
+                    "path": {
+                        "type": "string"
                     },
                     "price_idr": {
                         "type": "integer"
@@ -337,18 +344,9 @@ const docTemplate = `{
                     "rating_count": {
                         "type": "integer"
                     },
-                    "slug": {
-                        "type": "string"
-                    },
-                    "stock": {
-                        "type": "integer"
-                    },
-                    "summary": {
-                        "type": "string"
-                    },
-                    "tags": {
+                    "variants": {
                         "items": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/ProductVariant"
                         },
                         "type": "array",
                         "uniqueItems": false
@@ -358,16 +356,45 @@ const docTemplate = `{
                     "brand",
                     "category",
                     "id",
-                    "img",
+                    "img_alt",
+                    "img_url",
+                    "inventory",
                     "name",
                     "original_price_idr",
+                    "path",
                     "price_idr",
                     "rating",
-                    "rating_count",
-                    "slug",
-                    "stock",
-                    "summary",
-                    "tags"
+                    "rating_count"
+                ],
+                "type": "object"
+            },
+            "ProductVariant": {
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "inventory": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "original_price_idr": {
+                        "type": "integer"
+                    },
+                    "price_idr": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "inventory",
+                    "name",
+                    "original_price_idr",
+                    "price_idr"
                 ],
                 "type": "object"
             },
@@ -780,7 +807,7 @@ const docTemplate = `{
                                 }
                             }
                         },
-                        "description": "No such product"
+                        "description": "No such variant"
                     },
                     "500": {
                         "content": {
@@ -804,32 +831,22 @@ const docTemplate = `{
                 ]
             }
         },
-        "/cart/{id_product}": {
+        "/cart/{id_variant}": {
             "delete": {
                 "parameters": [
                     {
-                        "description": "Product id",
+                        "description": "Variant sqid",
                         "in": "path",
-                        "name": "id_product",
+                        "name": "id_variant",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
                         "description": "No Content"
-                    },
-                    "400": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Problem"
-                                }
-                            }
-                        },
-                        "description": "Invalid product id"
                     },
                     "401": {
                         "content": {
@@ -857,7 +874,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "summary": "Remove one product from the cart",
+                "summary": "Remove one variant from the cart",
                 "tags": [
                     "cart"
                 ]
@@ -1050,9 +1067,9 @@ const docTemplate = `{
                         }
                     },
                     {
-                        "description": "One of baru, unggulan, promo",
+                        "description": "Brand name",
                         "in": "query",
-                        "name": "tag",
+                        "name": "brand",
                         "schema": {
                             "type": "string"
                         }
@@ -1131,14 +1148,22 @@ const docTemplate = `{
                 ]
             }
         },
-        "/products/{slug}": {
+        "/products/{sqid}/{slug}": {
             "get": {
                 "parameters": [
                     {
-                        "description": "Product slug",
+                        "description": "Product sqid",
+                        "in": "path",
+                        "name": "sqid",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Decorative slug, ignored when resolving and corrected by redirect",
                         "in": "path",
                         "name": "slug",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -1154,6 +1179,16 @@ const docTemplate = `{
                             }
                         },
                         "description": "OK"
+                    },
+                    "302": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": "Slug is absent or stale"
                     },
                     "404": {
                         "content": {
@@ -1176,7 +1211,7 @@ const docTemplate = `{
                         "description": "Internal error"
                     }
                 },
-                "summary": "Fetch one product by slug",
+                "summary": "Fetch one product",
                 "tags": [
                     "products"
                 ]

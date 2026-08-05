@@ -10,11 +10,12 @@ import (
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/middleware"
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/model"
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/repository"
+	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/sqid"
 )
 
-func Order(r *gin.Engine, pool *pgxpool.Pool) {
-	r.GET("/orders", middleware.Auth(), listOrders(pool))
-	r.POST("/orders", middleware.Auth(), createOrder(pool))
+func Order(r *gin.Engine, pool *pgxpool.Pool, codec *sqid.Codec) {
+	r.GET("/orders", middleware.Auth(), listOrders(pool, codec))
+	r.POST("/orders", middleware.Auth(), createOrder(pool, codec))
 }
 
 // listOrders godoc
@@ -26,9 +27,9 @@ func Order(r *gin.Engine, pool *pgxpool.Pool) {
 // @Failure  401 {object} model.Problem "Missing or invalid token"
 // @Failure  500 {object} model.Problem "Internal error"
 // @Router   /orders [get]
-func listOrders(pool *pgxpool.Pool) gin.HandlerFunc {
+func listOrders(pool *pgxpool.Pool, codec *sqid.Codec) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		orders, err := repository.Orders(ctx, pool, ctx.GetInt64(middleware.ContextIDUser))
+		orders, err := repository.Orders(ctx, pool, codec, ctx.GetInt64(middleware.ContextIDUser))
 		if err != nil {
 			model.AbortProblem(ctx, http.StatusInternalServerError, err.Error())
 			return
@@ -51,7 +52,7 @@ func listOrders(pool *pgxpool.Pool) gin.HandlerFunc {
 // @Failure  409 {object} model.Problem "Empty cart or insufficient stock"
 // @Failure  500 {object} model.Problem "Internal error"
 // @Router   /orders [post]
-func createOrder(pool *pgxpool.Pool) gin.HandlerFunc {
+func createOrder(pool *pgxpool.Pool, codec *sqid.Codec) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req model.OrderRequest
 		if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -59,7 +60,7 @@ func createOrder(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		order, err := repository.CreateOrder(ctx, pool, ctx.GetInt64(middleware.ContextIDUser), req)
+		order, err := repository.CreateOrder(ctx, pool, codec, ctx.GetInt64(middleware.ContextIDUser), req)
 		if err != nil {
 			var orderErr *repository.OrderError
 			if errors.As(err, &orderErr) {

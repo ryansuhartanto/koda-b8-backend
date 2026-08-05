@@ -9,47 +9,62 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/model"
+	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/sqid"
 )
 
 var ProductSort = map[string]string{
 	"newest":     "p.created_at DESC, p.id DESC",
 	"price_asc":  "p.price_idr ASC, p.id ASC",
 	"price_desc": "p.price_idr DESC, p.id DESC",
-	"rating":     "p.rating DESC, p.id DESC",
+	"rating":     "p.rating DESC NULLS LAST, p.id DESC",
 }
 
 type ProductFilter struct {
 	Search   string
 	Category string
-	Tag      string
+	Brand    string
 	Sort     string
 	Limit    int
 	Offset   int
 }
 
 const productColumns = `
-	p.id, p.slug, p.name,
-	COALESCE(p.brand, ''), COALESCE(c.name, ''), COALESCE(p.img, ''), COALESCE(p.summary, ''),
-	p.price_idr, COALESCE(p.original_price_idr, 0), p.stock,
-	p.rating, p.rating_count, p.tags
-FROM products p
-LEFT JOIN categories c ON c.id = p.id_category AND c.deleted_at IS NULL
-WHERE p.deleted_at IS NULL`
+	p.id, p.name, COALESCE(p.description, ''),
+	COALESCE(p.brand, ''), COALESCE(p.category, ''),
+	COALESCE(p.img_url, ''), COALESCE(p.img_alt, ''),
+	p.price_idr, p.original_price_idr,
+	p.inventory,
+	COALESCE(p.rating, 0)::FLOAT, p.rating_count
+FROM products_summary p
+WHERE TRUE`
 
-func scanProduct(row pgx.Row) (model.Product, error) {
-	var p model.Product
-
-	err := row.Scan(
-		&p.ID, &p.Slug, &p.Name,
-		&p.Brand, &p.Category, &p.Img, &p.Summary,
-		&p.PriceIdr, &p.OriginalPriceIdr, &p.Stock,
-		&p.Rating, &p.RatingCount, &p.Tags,
+func scanProduct(row pgx.Row, codec *sqid.Codec) (model.Product, error) {
+	var (
+		p  model.Product
+		id int64
 	)
 
-	return p, err
+	err := row.Scan(
+		&id, &p.Name, &p.Description,
+		&p.Brand, &p.Category, &p.ImgURL, &p.ImgAlt,
+		&p.PriceIdr, &p.OriginalPriceIdr,
+		&p.Inventory,
+		&p.Rating, &p.RatingCount,
+	)
+	if err != nil {
+		return p, err
+	}
+
+	if p.ID, err = codec.Encode(id); err != nil {
+		return p, err
+	}
+
+	p.Path = model.ProductPath(p.ID, p.Name)
+
+	return p, nil
 }
 
-func Products(ctx context.Context, pool *pgxpool.Pool, filter ProductFilter) ([]model.Product, error) {
+func Products(ctx context.Context, pool *pgxpool.Pool, codec *sqid.Codec, filter ProductFilter) ([]model.Product, error) {
 	query := strings.Builder{}
 	query.WriteString("SELECT" + productColumns)
 
@@ -62,12 +77,12 @@ func Products(ctx context.Context, pool *pgxpool.Pool, filter ProductFilter) ([]
 
 	if filter.Category != "" {
 		args = append(args, filter.Category)
-		fmt.Fprintf(&query, " AND c.name = $%d", len(args))
+		fmt.Fprintf(&query, " AND p.category = $%d", len(args))
 	}
 
-	if filter.Tag != "" {
-		args = append(args, filter.Tag)
-		fmt.Fprintf(&query, " AND $%d = ANY(p.tags)", len(args))
+	if filter.Brand != "" {
+		args = append(args, filter.Brand)
+		fmt.Fprintf(&query, " AND p.brand = $%d", len(args))
 	}
 
 	args = append(args, filter.Limit, filter.Offset)
@@ -82,7 +97,7 @@ func Products(ctx context.Context, pool *pgxpool.Pool, filter ProductFilter) ([]
 	products := []model.Product{}
 
 	for rows.Next() {
-		p, err := scanProduct(rows)
+		p, err := scanProduct(rows, codec)
 		if err != nil {
 			return nil, err
 		}
@@ -93,6 +108,47 @@ func Products(ctx context.Context, pool *pgxpool.Pool, filter ProductFilter) ([]
 	return products, rows.Err()
 }
 
-func ProductBySlug(ctx context.Context, pool *pgxpool.Pool, slug string) (model.Product, error) {
-	return scanProduct(pool.QueryRow(ctx, "SELECT"+productColumns+" AND p.slug = $1", slug))
+func ProductByID(ctx context.Context, pool *pgxpool.Pool, codec *sqid.Codec, id int64) (model.Product, error) {
+	p, err := scanProduct(pool.QueryRow(ctx, "SELECT"+productColumns+" AND p.id = $1", id), codec)
+	if err != nil {
+		return p, err
+	}
+
+	p.Variants, err = productVariants(ctx, pool, codec, id)
+
+	return p, err
+}
+
+func productVariants(ctx context.Context, pool *pgxpool.Pool, codec *sqid.Codec, id int64) ([]model.ProductVariant, error) {
+	rows, err := pool.Query(ctx, `
+		SELECT pv.id, pv.name, COALESCE(pv.description, ''), pv.inventory, pp.price_idr, pp.original_price_idr
+		FROM products_variants pv
+		JOIN products_price pp ON pp.id_variant = pv.id
+		WHERE pv.id_product = $1 AND pv.deleted_at IS NULL
+		ORDER BY pv.position ASC, pv.id ASC`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	variants := []model.ProductVariant{}
+
+	for rows.Next() {
+		var (
+			v       model.ProductVariant
+			variant int64
+		)
+
+		if err := rows.Scan(&variant, &v.Name, &v.Description, &v.Inventory, &v.PriceIdr, &v.OriginalPriceIdr); err != nil {
+			return nil, err
+		}
+
+		if v.ID, err = codec.Encode(variant); err != nil {
+			return nil, err
+		}
+
+		variants = append(variants, v)
+	}
+
+	return variants, rows.Err()
 }

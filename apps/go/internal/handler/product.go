@@ -5,6 +5,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/model"
 	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/repository"
+	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/slug"
+	"github.com/ryansuhartanto/koda-b8-backend/apps/go/internal/sqid"
 )
 
 const (
@@ -19,9 +22,11 @@ const (
 	maxLimit     = 100
 )
 
-func Product(r *gin.Engine, pool *pgxpool.Pool) {
-	r.GET("/products", listProducts(pool))
-	r.GET("/products/:slug", productBySlug(pool))
+func Product(r *gin.Engine, pool *pgxpool.Pool, codec *sqid.Codec) {
+	r.GET("/products", listProducts(pool, codec))
+
+	r.GET("/products/:sqid", productBySqid(pool, codec))
+	r.GET("/products/:sqid/*slug", productBySqid(pool, codec))
 }
 
 func intQuery(ctx *gin.Context, key string, fallback, min, max int) (int, error) {
@@ -44,7 +49,7 @@ func intQuery(ctx *gin.Context, key string, fallback, min, max int) (int, error)
 // @Produce  json
 // @Param    search   query string false "Match against the product name"
 // @Param    category query string false "Category name"
-// @Param    tag      query string false "One of baru, unggulan, promo"
+// @Param    brand    query string false "Brand name"
 // @Param    sort     query string false "One of newest, price_asc, price_desc, rating" Enums(newest, price_asc, price_desc, rating)
 // @Param    limit    query int    false "Rows to return, 1 to 100" default(20)
 // @Param    offset   query int    false "Rows to skip"             default(0)
@@ -52,7 +57,7 @@ func intQuery(ctx *gin.Context, key string, fallback, min, max int) (int, error)
 // @Failure  400 {object} model.Problem "Invalid query"
 // @Failure  500 {object} model.Problem "Internal error"
 // @Router   /products [get]
-func listProducts(pool *pgxpool.Pool) gin.HandlerFunc {
+func listProducts(pool *pgxpool.Pool, codec *sqid.Codec) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sort := ctx.DefaultQuery("sort", "newest")
 		if _, ok := repository.ProductSort[sort]; !ok {
@@ -72,10 +77,10 @@ func listProducts(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		products, err := repository.Products(ctx, pool, repository.ProductFilter{
+		products, err := repository.Products(ctx, pool, codec, repository.ProductFilter{
 			Search:   ctx.Query("search"),
 			Category: ctx.Query("category"),
-			Tag:      ctx.Query("tag"),
+			Brand:    ctx.Query("brand"),
 			Sort:     sort,
 			Limit:    limit,
 			Offset:   offset,
@@ -89,18 +94,26 @@ func listProducts(pool *pgxpool.Pool) gin.HandlerFunc {
 	}
 }
 
-// productBySlug godoc
-// @Summary  Fetch one product by slug
+// productBySqid godoc
+// @Summary  Fetch one product
 // @Tags     products
 // @Produce  json
-// @Param    slug path string true "Product slug"
+// @Param    sqid path string true  "Product sqid"
+// @Param    slug path string false "Decorative slug, ignored when resolving and corrected by redirect"
 // @Success  200 {object} model.Product "OK"
+// @Success  302 {string} string        "Slug is absent or stale"
 // @Failure  404 {object} model.Problem "No such product"
 // @Failure  500 {object} model.Problem "Internal error"
-// @Router   /products/{slug} [get]
-func productBySlug(pool *pgxpool.Pool) gin.HandlerFunc {
+// @Router   /products/{sqid}/{slug} [get]
+func productBySqid(pool *pgxpool.Pool, codec *sqid.Codec) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		product, err := repository.ProductBySlug(ctx, pool, ctx.Param("slug"))
+		id, err := codec.Decode(ctx.Param("sqid"))
+		if err != nil {
+			model.AbortProblem(ctx, http.StatusNotFound, "no such product")
+			return
+		}
+
+		product, err := repository.ProductByID(ctx, pool, codec, id)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				model.AbortProblem(ctx, http.StatusNotFound, "no such product")
@@ -108,6 +121,11 @@ func productBySlug(pool *pgxpool.Pool) gin.HandlerFunc {
 			}
 
 			model.AbortProblem(ctx, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if strings.TrimPrefix(ctx.Param("slug"), "/") != slug.Make(product.Name) {
+			ctx.Redirect(http.StatusFound, product.Path)
 			return
 		}
 

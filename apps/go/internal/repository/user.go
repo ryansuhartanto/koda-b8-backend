@@ -12,14 +12,30 @@ type User struct {
 }
 
 func CreateUser(ctx context.Context, pool *pgxpool.Pool, name, email, passwordHash string) (int64, error) {
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback(ctx)
+
 	var id int64
 
-	err := pool.QueryRow(ctx,
-		`INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id`,
-		name, email, passwordHash,
-	).Scan(&id)
+	if err := tx.QueryRow(ctx,
+		`INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id`,
+		email, passwordHash,
+	).Scan(&id); err != nil {
+		return 0, err
+	}
 
-	return id, err
+	if _, err := tx.Exec(ctx, `INSERT INTO profile (id_user, name) VALUES ($1, $2)`, id, name); err != nil {
+		return 0, err
+	}
+
+	if _, err := tx.Exec(ctx, `INSERT INTO roles (id_user, role) VALUES ($1, 'customer')`, id); err != nil {
+		return 0, err
+	}
+
+	return id, tx.Commit(ctx)
 }
 
 func UserByEmail(ctx context.Context, pool *pgxpool.Pool, email string) (User, error) {
