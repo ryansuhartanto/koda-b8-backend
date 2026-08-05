@@ -70,16 +70,16 @@ products          ||--o{ products_images   : "shown by"
 products_variants |o--o{ products_images   : "shown by"
 products_variants ||--|| products_price    : "priced at"
 users             ||--o{ ratings           : "writes"
-products          ||--o{ ratings           : "rated by"
+products_variants ||--o{ ratings           : "rated by"
 users             ||--o{ saved_address     : "has"
 users             ||--o{ saved_payments    : "has"
 users             ||--o{ cart_items        : "has"
-products          ||--o{ cart_items        : "in"
+products_variants ||--o{ cart_items        : "in"
 users             ||--o{ wishlist_items    : "has"
 products          ||--o{ wishlist_items    : "in"
 users             ||--o{ orders            : "places"
 orders            ||--o{ order_items       : "detailed by"
-products          |o--o{ order_items       : "snapshotted in"
+products_variants |o--o{ order_items       : "snapshotted in"
 
 users {
  int id PK
@@ -188,7 +188,7 @@ ratings {
  timestamptz? deleted_at
 
  int id_user    FK,UK
- int id_product FK,UK
+ int id_variant FK,UK
 
  int     rating
  string? description
@@ -230,7 +230,7 @@ cart_items {
  timestamptz created_at
 
  int id_user    PK,FK
- int id_product PK,FK
+ int id_variant PK,FK
 
  int quantity
 }
@@ -272,9 +272,10 @@ order_items {
  int id PK
 
  int  id_order   FK
- int? id_product FK
+ int? id_variant FK
 
  string product_name
+ string variant_name
  bigint unit_price_idr
  int    quantity
 }

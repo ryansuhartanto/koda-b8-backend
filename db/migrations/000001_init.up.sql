@@ -130,15 +130,15 @@ CREATE TABLE ratings (
     deleted_at TIMESTAMPTZ,
 
     id_user BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    id_product BIGINT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+    id_variant BIGINT NOT NULL REFERENCES products_variants (id) ON DELETE CASCADE,
 
     rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     description VARCHAR
 );
 
-CREATE UNIQUE INDEX ratings_id_user_id_product_key ON ratings (id_user, id_product) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX ratings_id_user_id_product_key ON ratings (id_user, id_variant) WHERE deleted_at IS NULL;
 
-CREATE INDEX ratings_id_product_idx ON ratings (id_product);
+CREATE INDEX ratings_id_product_idx ON ratings (id_variant);
 
 CREATE TABLE saved_address (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -180,13 +180,13 @@ CREATE TABLE cart_items (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     id_user BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    id_product BIGINT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
-    PRIMARY KEY (id_user, id_product),
+    id_variant BIGINT NOT NULL REFERENCES products_variants (id) ON DELETE CASCADE,
+    PRIMARY KEY (id_user, id_variant),
 
     quantity INT NOT NULL CHECK (quantity > 0)
 );
 
-CREATE INDEX cart_items_id_product_idx ON cart_items (id_product);
+CREATE INDEX cart_items_id_variant_idx ON cart_items (id_variant);
 
 CREATE TABLE wishlist_items (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -243,16 +243,17 @@ CREATE TABLE order_items (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
     id_order BIGINT NOT NULL REFERENCES orders (id) ON DELETE CASCADE,
-    id_product BIGINT REFERENCES products (id) ON DELETE SET NULL,
+    id_variant BIGINT REFERENCES products_variants (id) ON DELETE SET NULL,
 
     product_name VARCHAR NOT NULL,
+    variant_name VARCHAR NOT NULL,
     unit_price_idr BIGINT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0)
 );
 
 CREATE INDEX order_items_id_order_idx ON order_items (id_order);
 
-CREATE INDEX order_items_id_product_idx ON order_items (id_product);
+CREATE INDEX order_items_id_variant_idx ON order_items (id_variant);
 
 --
 
