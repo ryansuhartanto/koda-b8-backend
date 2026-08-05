@@ -2,6 +2,8 @@ DROP TABLE order_items;
 
 DROP TABLE orders;
 
+DROP TABLE shipping_methods;
+
 DROP TABLE wishlist_items;
 
 DROP TABLE cart_items;
