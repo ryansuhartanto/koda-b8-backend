@@ -1,9 +1,15 @@
 export type OrderItem = {
 	id: number;
-	id_product: number;
+	id_variant?: string;
 	product_name: string;
+	variant_name: string;
 	unit_price_idr: number;
 	quantity: number;
+};
+
+export type OrderItemRow = Omit<OrderItem, "id_variant"> & {
+	id_order: number;
+	id_variant: number;
 };
 
 export type Order = {
@@ -20,9 +26,6 @@ export type Order = {
 	ship_phone: string;
 	ship_email: string;
 	ship_address: string;
-	ship_city: string;
-	ship_province: string;
-	ship_postal_code: string;
 	ship_method: string;
 	ship_note: string;
 	items: OrderItem[];
