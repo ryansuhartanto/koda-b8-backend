@@ -12,6 +12,25 @@ jobs:
       group: ${{ github.ref }}
     env:
       GOTESTSUM_FORMAT: github-actions
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: ecommerce
+    services:
+      db:
+        image: postgres:alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ecommerce
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v7
 
@@ -38,6 +57,12 @@ jobs:
 
       - name: Test
         run: mise run test
+
+      - name: Migrate, seed and roll back
+        run: |
+          mise run db:up
+          mise run db:seed
+          mise run db down -all
 
       - name: Check specs are current
         run: |
