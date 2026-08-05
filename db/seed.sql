@@ -105,28 +105,28 @@ FROM (VALUES
 JOIN products p ON p.name = v.name
 JOIN products_variants pv ON pv.id_product = p.id;
 
-INSERT INTO products_images (id_product, url, alt)
-SELECT p.id, v.url, v.alt
+INSERT INTO products_images (id_product, url)
+SELECT p.id, v.url
 FROM (VALUES
-    ('Headphone Wireless Premium', '/images/product/soundwave-headphone_wireless_premium.png', 'Headphone Wireless Premium'),
-    ('Smartphone 5G Ultra', '/images/product/phonex-smartphone_5g_ultra.png', 'Smartphone 5G Ultra'),
-    ('Smartwatch Series 5', '/images/product/wristtech-smartwatch_series_5.png', 'Smartwatch Series 5'),
-    ('Kaos Polos Premium Cotton', '/images/product/fashionid-kaos_polos_premium_cotton.png', 'Kaos Polos Premium Cotton'),
-    ('Sneakers Sport Runfast', '/images/product/sportpro-sneakers_sport_runfast.png', 'Sneakers Sport Runfast'),
-    ('Tas Ransel Laptop Waterproof', '/images/product/urbanbag-tas_ransel_laptop_waterproof.png', 'Tas Ransel Laptop Waterproof'),
-    ('Coffee Maker Otomatis', '/images/product/brewmaster-coffee_maker_otomatis.png', 'Coffee Maker Otomatis'),
-    ('Blender Portable Mini', '/images/product/blendpro-blender_portable_mini.png', 'Blender Portable Mini'),
-    ('Set Peralatan Makan Keramik', '/images/product/homedeco-set_peralatan_makan_keramik.png', 'Set Peralatan Makan Keramik'),
-    ('Tablet 10.5" WiFi + 4G', '/images/product/tabtech-tablet_10_5_wifi_4g.png', 'Tablet 10.5" WiFi + 4G'),
-    ('Serum Vitamin C Brightening', '/images/product/glowlab-serum_vitamin_c_brightening.png', 'Serum Vitamin C Brightening'),
-    ('Sepatu Lari Trail Ultra', '/images/product/trailrunner-sepatu_lari_trail_ultra.png', 'Sepatu Lari Trail Ultra'),
-    ('Buku "Atomic Habits"', '/images/product/gramedia-buku_atomic_habits.png', 'Buku "Atomic Habits"'),
-    ('Speaker Bluetooth Portable', '/images/product/soundwave-speaker_bluetooth_portable.png', 'Speaker Bluetooth Portable'),
-    ('Dress Floral Midi', '/images/product/fashionid-dress_floral_midi.png', 'Dress Floral Midi'),
-    ('Minyak Esensial Lavender Set', '/images/product/aromawell-minyak_esensial_lavender_set.png', 'Minyak Esensial Lavender Set'),
-    ('Matras Yoga Premium', '/images/product/fitlife-matras_yoga_premium.png', 'Matras Yoga Premium'),
-    ('Raket Badminton Carbon Pro', '/images/product/smashking-raket_badminton_carbon_pro.png', 'Raket Badminton Carbon Pro')
-) AS v (name, url, alt)
+    ('Headphone Wireless Premium', '/images/product/soundwave-headphone_wireless_premium.png'),
+    ('Smartphone 5G Ultra', '/images/product/phonex-smartphone_5g_ultra.png'),
+    ('Smartwatch Series 5', '/images/product/wristtech-smartwatch_series_5.png'),
+    ('Kaos Polos Premium Cotton', '/images/product/fashionid-kaos_polos_premium_cotton.png'),
+    ('Sneakers Sport Runfast', '/images/product/sportpro-sneakers_sport_runfast.png'),
+    ('Tas Ransel Laptop Waterproof', '/images/product/urbanbag-tas_ransel_laptop_waterproof.png'),
+    ('Coffee Maker Otomatis', '/images/product/brewmaster-coffee_maker_otomatis.png'),
+    ('Blender Portable Mini', '/images/product/blendpro-blender_portable_mini.png'),
+    ('Set Peralatan Makan Keramik', '/images/product/homedeco-set_peralatan_makan_keramik.png'),
+    ('Tablet 10.5" WiFi + 4G', '/images/product/tabtech-tablet_10_5_wifi_4g.png'),
+    ('Serum Vitamin C Brightening', '/images/product/glowlab-serum_vitamin_c_brightening.png'),
+    ('Sepatu Lari Trail Ultra', '/images/product/trailrunner-sepatu_lari_trail_ultra.png'),
+    ('Buku "Atomic Habits"', '/images/product/gramedia-buku_atomic_habits.png'),
+    ('Speaker Bluetooth Portable', '/images/product/soundwave-speaker_bluetooth_portable.png'),
+    ('Dress Floral Midi', '/images/product/fashionid-dress_floral_midi.png'),
+    ('Minyak Esensial Lavender Set', '/images/product/aromawell-minyak_esensial_lavender_set.png'),
+    ('Matras Yoga Premium', '/images/product/fitlife-matras_yoga_premium.png'),
+    ('Raket Badminton Carbon Pro', '/images/product/smashking-raket_badminton_carbon_pro.png')
+) AS v (name, url)
 JOIN products p ON p.name = v.name;
 
 INSERT INTO shipping_methods (name, cost_idr)
