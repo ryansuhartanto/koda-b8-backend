@@ -106,8 +106,7 @@ CREATE TABLE products_images (
     id_product BIGINT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
     id_variant BIGINT REFERENCES products_variants (id) ON DELETE CASCADE,
 
-    url VARCHAR NOT NULL,
-    alt VARCHAR
+    url VARCHAR NOT NULL
 );
 
 CREATE INDEX products_images_id_product_idx ON products_images (id_product);
