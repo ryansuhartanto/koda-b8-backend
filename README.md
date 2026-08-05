@@ -71,7 +71,7 @@ products_variants |o--o{ products_images   : "shown by"
 products_variants ||--|| products_price    : "priced at"
 users             ||--o{ ratings           : "writes"
 products          ||--o{ ratings           : "rated by"
-users             ||--o{ addresses         : "has"
+users             ||--o{ saved_address     : "has"
 users             ||--o{ saved_payments    : "has"
 users             ||--o{ cart_items        : "has"
 products          ||--o{ cart_items        : "in"
@@ -194,7 +194,7 @@ ratings {
  string? description
 }
 
-addresses {
+saved_address {
  int id PK
 
  timestamptz  created_at
@@ -258,7 +258,7 @@ orders {
  bigint  discount_idr
  bigint  subtotal_idr
  bigint  ship_cost_idr
- bigint  total_idr
+ bigint  total_idr "GENERATED ALWAYS AS (subtotal_idr - discount_idr + ship_cost_idr) STORED"
 
  string  ship_name
  string  ship_phone
