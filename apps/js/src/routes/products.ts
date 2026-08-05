@@ -291,16 +291,14 @@ async function productBySqid(
 			[id],
 		);
 
-		product.variants = variants.map(
-			(row): ProductVariant => ({
-				id: encode(row.id),
-				name: row.name,
-				description: row.description,
-				inventory: row.inventory,
-				price_idr: row.price_idr,
-				original_price_idr: row.original_price_idr,
-			}),
-		);
+		product.variants = variants.map((row): ProductVariant => ({
+			id: encode(row.id),
+			name: row.name,
+			description: row.description,
+			inventory: row.inventory,
+			price_idr: row.price_idr,
+			original_price_idr: row.original_price_idr,
+		}));
 
 		res.json(product);
 	} catch (error) {

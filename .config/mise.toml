@@ -70,7 +70,7 @@ run = "migrate create -ext sql -dir db/migrations -seq {{usage.name}}"
 run = "migrate -database pgx5://: -path db/migrations"
 
 [tasks."db:seed"]
-run = 'usql "postgres://" -f db/seed.sql'
+run = "aube --dir db/seed run start"
 
 [tasks."db:up"]
 run = "mise run db up"

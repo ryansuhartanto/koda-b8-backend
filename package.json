@@ -4,7 +4,8 @@
 	"author": "Ryan Suhartanto <suhartanto@kekkon.nexus>",
 	"repository": "ryansuhartanto/koda-b8-backend",
 	"workspaces": [
-		"apps/js"
+		"apps/js",
+		"db/seed"
 	],
 	"type": "module",
 	"imports": {
