@@ -69,6 +69,9 @@ CREATE UNIQUE INDEX products_slug_key ON products (slug) WHERE deleted_at IS NUL
 
 CREATE INDEX products_tags_idx ON products USING GIN (tags);
 
+-- REFERENCES indexes neither side of the constraint, so every FK column is indexed by hand
+CREATE INDEX products_id_category_idx ON products (id_category);
+
 CREATE TABLE addresses (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
@@ -88,6 +91,8 @@ CREATE TABLE addresses (
     is_default BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+CREATE INDEX addresses_id_user_idx ON addresses (id_user);
+
 CREATE TABLE saved_payments (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
@@ -101,6 +106,8 @@ CREATE TABLE saved_payments (
     is_default BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+CREATE INDEX saved_payments_id_user_idx ON saved_payments (id_user);
+
 CREATE TABLE cart_items (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -111,6 +118,8 @@ CREATE TABLE cart_items (
     quantity INT NOT NULL CHECK (quantity > 0)
 );
 
+CREATE INDEX cart_items_id_product_idx ON cart_items (id_product);
+
 CREATE TABLE wishlist_items (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -118,6 +127,21 @@ CREATE TABLE wishlist_items (
     id_product BIGINT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
     PRIMARY KEY (id_user, id_product)
 );
+
+CREATE INDEX wishlist_items_id_product_idx ON wishlist_items (id_product);
+
+CREATE TABLE shipping_methods (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ,
+
+    name VARCHAR NOT NULL,
+    cost_idr BIGINT NOT NULL
+);
+
+CREATE UNIQUE INDEX shipping_methods_name_key ON shipping_methods (name) WHERE deleted_at IS NULL;
 
 CREATE TABLE orders (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -148,6 +172,8 @@ CREATE TABLE orders (
     ship_note VARCHAR
 );
 
+CREATE INDEX orders_id_user_idx ON orders (id_user);
+
 CREATE TABLE order_items (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
@@ -160,6 +186,8 @@ CREATE TABLE order_items (
 );
 
 CREATE INDEX order_items_id_order_idx ON order_items (id_order);
+
+CREATE INDEX order_items_id_product_idx ON order_items (id_product);
 
 --
 
@@ -193,6 +221,10 @@ FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
 CREATE TRIGGER saved_payments_updated_at
 BEFORE UPDATE ON saved_payments
+FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+
+CREATE TRIGGER shipping_methods_updated_at
+BEFORE UPDATE ON shipping_methods
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
 CREATE TRIGGER orders_updated_at
