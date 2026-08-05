@@ -61,168 +61,233 @@ title: BeliMudah
 ---
 erDiagram
 
-categories |o--o{ products       : "groups"
-users      ||--o{ addresses      : "has"
-users      ||--o{ saved_payments : "has"
-users      ||--o{ cart_items     : "has"
-products   ||--o{ cart_items     : "in"
-users      ||--o{ wishlist_items : "has"
-products   ||--o{ wishlist_items : "in"
-users      ||--o{ orders         : "places"
-orders     ||--o{ order_items    : "detailed by"
-products   |o--o{ order_items    : "snapshotted in"
+users             ||--o{ roles             : "holds"
+users             ||--|| profile           : "described by"
+categories        |o--o{ products          : "groups"
+brands            |o--o{ products          : "makes"
+products          ||--o{ products_variants : "varies as"
+products          ||--o{ products_images   : "shown by"
+products_variants |o--o{ products_images   : "shown by"
+products_variants ||--|| products_price    : "priced at"
+users             ||--o{ ratings           : "writes"
+products          ||--o{ ratings           : "rated by"
+users             ||--o{ addresses         : "has"
+users             ||--o{ saved_payments    : "has"
+users             ||--o{ cart_items        : "has"
+products          ||--o{ cart_items        : "in"
+users             ||--o{ wishlist_items    : "has"
+products          ||--o{ wishlist_items    : "in"
+users             ||--o{ orders            : "places"
+orders            ||--o{ order_items       : "detailed by"
+products          |o--o{ order_items       : "snapshotted in"
 
 users {
-    int id PK
+ int id PK
 
-    timestamptz  created_at
-    timestamptz  updated_at
-    timestamptz? deleted_at
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
 
-    enum   role "customer | admin"
-    string email UK
-    string password_hash
-    string name
+ string email UK
+ string password_hash
+}
 
-    string? phone
-    date?   birthdate
-    enum?   gender "M | F | X"
-    string? avatar
+roles {
+ int  id_user PK,FK
+ enum role    PK,FK "customer | admin"
+
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
+}
+
+profile {
+ int id_user PK,FK
+
+ string name
+
+ string? phone
+ date?   birthdate
+ enum?   gender "M | F | X"
+ string? avatar
 }
 
 categories {
-    int id PK
+ int id PK
 
-    timestamptz  created_at
-    timestamptz  updated_at
-    timestamptz? deleted_at
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
 
-    string  name UK
-    string? icon
-    string? img
+ string  name UK
+ string? icon
+ string? img
+}
+
+brands {
+ int id PK
+
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
 }
 
 products {
-    int id PK
+ int id PK
 
-    timestamptz  created_at
-    timestamptz  updated_at
-    timestamptz? deleted_at
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
 
-    int? id_category FK
+ int? id_category FK
+ int? id_brand    FK
 
-    string  slug UK
-    string  name
-    string? brand
-    string? img
-    string? summary
+ string  name
+ string? description
+}
 
-    bigint  price_idr
-    bigint? original_price_idr
-    int     stock
+products_variants {
+ int id PK
 
-    decimal rating
-    int     rating_count
-    string  tags "TEXT[]"
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
+
+ int id_product FK
+ int position
+
+ int inventory
+
+ string  name
+ string? description
+}
+
+products_images {
+ int id PK
+
+ int  id_product FK
+ int? id_variant FK
+
+ string  url
+ string? alt
+}
+
+products_price {
+ int id_variant PK,FK
+
+ bigint  original_price_idr
+ bigint? discount_price_idr "CHECK (discount_price_idr < original_price_idr)"
+ bigint  price_idr "GENERATED ALWAYS AS (COALESCE(discount_price_idr, original_price_idr)) STORED"
+}
+
+ratings {
+ int id PK
+
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
+
+ int id_user    FK,UK
+ int id_product FK,UK
+
+ int     rating
+ string? description
 }
 
 addresses {
-    int id PK
+ int id PK
 
-    timestamptz  created_at
-    timestamptz  updated_at
-    timestamptz? deleted_at
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
 
-    int id_user FK
+ int id_user FK
 
-    string  label
-    string  name
-    string  phone
-    string  address
-    string  city
-    string  province
-    string  postal_code
-    bool    is_default
+ string  label
+ string  name
+ string  phone
+ string  address
+ string  city
+ string  province
+ string  postal_code
+ bool    is_default
 }
 
 saved_payments {
-    int id PK
+ int id PK
 
-    timestamptz  created_at
-    timestamptz  updated_at
-    timestamptz? deleted_at
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
 
-    int id_user FK
+ int id_user FK
 
-    string type
-    bool   is_default
+ string type
+ bool   is_default
 }
 
 cart_items {
-    timestamptz created_at
+ timestamptz created_at
 
-    int id_user    PK,FK
-    int id_product PK,FK
+ int id_user    PK,FK
+ int id_product PK,FK
 
-    int quantity
+ int quantity
 }
 
 wishlist_items {
-    timestamptz created_at
+ timestamptz created_at
 
-    int id_user    PK,FK
-    int id_product PK,FK
+ int id_user    PK,FK
+ int id_product PK,FK
 }
 
 orders {
-    int id PK
+ int id PK
 
-    timestamptz  created_at
-    timestamptz  updated_at
-    timestamptz? deleted_at
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
 
-    int id_user FK
+ int id_user FK
 
-    enum   status "pending | packed | shipped | delivered | cancelled"
-    string payment_method
+ enum   status "pending | packed | shipped | delivered | cancelled"
+ string payment_method
 
-    string? promo_code
-    bigint  discount_idr
-    bigint  subtotal_idr
-    bigint  ship_cost_idr
-    bigint  total_idr
+ string? promo_code
+ bigint  discount_idr
+ bigint  subtotal_idr
+ bigint  ship_cost_idr
+ bigint  total_idr
 
-    string  ship_name
-    string  ship_phone
-    string  ship_email
-    string  ship_address
-    string  ship_city
-    string  ship_province
-    string  ship_postal_code
-    string  ship_method
-    string? ship_note
+ string  ship_name
+ string  ship_phone
+ string  ship_email
+ string  ship_address
+ string  ship_method
+ string? ship_note
 }
 
 order_items {
-    int id PK
+ int id PK
 
-    int  id_order   FK
-    int? id_product FK
+ int  id_order   FK
+ int? id_product FK
 
-    string product_name
-    bigint unit_price_idr
-    int    quantity
+ string product_name
+ bigint unit_price_idr
+ int    quantity
 }
 
 shipping_methods {
-    int id PK
+ int id PK
 
-    timestamptz  created_at
-    timestamptz  updated_at
-    timestamptz? deleted_at
+ timestamptz  created_at
+ timestamptz  updated_at
+ timestamptz? deleted_at
 
-    string name UK
-    bigint cost_idr
+ string name UK
+ bigint cost_idr
 }
 ```
 
