@@ -136,7 +136,7 @@ router.get("/addresses", auth, async (req, res) => {
 	try {
 		const { rows } = await pool.query<Address>(
 			`SELECT ${columns}
-			FROM addresses
+			FROM saved_address
 			WHERE id_user = $1 AND deleted_at IS NULL
 			ORDER BY is_default DESC, id`,
 			[req.idUser],
@@ -169,13 +169,13 @@ router.post("/addresses", auth, async (req, res) => {
 
 		if (body.is_default) {
 			await client.query(
-				"UPDATE addresses SET is_default = FALSE WHERE id_user = $1 AND deleted_at IS NULL",
+				"UPDATE saved_address SET is_default = FALSE WHERE id_user = $1 AND deleted_at IS NULL",
 				[req.idUser],
 			);
 		}
 
 		const { rows } = await client.query<Address>(
-			`INSERT INTO addresses (id_user, label, name, phone, address, city, province, postal_code, is_default)
+			`INSERT INTO saved_address (id_user, label, name, phone, address, city, province, postal_code, is_default)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			RETURNING ${columns}`,
 			[

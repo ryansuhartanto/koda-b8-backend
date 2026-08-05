@@ -115,12 +115,16 @@ router.post("/auth/register", async (req, res) => {
 		return;
 	}
 
+	const client = await pool.connect();
+
 	try {
 		const passwordHash = await hash(body.password, 10);
 
-		const { rows } = await pool.query<{ id: number }>(
-			"INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id",
-			[body.name, body.email, passwordHash],
+		await client.query("BEGIN");
+
+		const { rows } = await client.query<{ id: number }>(
+			"INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id",
+			[body.email, passwordHash],
 		);
 
 		const [user] = rows;
@@ -129,10 +133,25 @@ router.post("/auth/register", async (req, res) => {
 			throw new Error("insert returned no row");
 		}
 
+		await client.query("INSERT INTO profile (id_user, name) VALUES ($1, $2)", [
+			user.id,
+			body.name,
+		]);
+
+		// role is part of the primary key, so it has no column default to fall back on
+		await client.query(
+			"INSERT INTO roles (id_user, role) VALUES ($1, 'customer')",
+			[user.id],
+		);
+
+		await client.query("COMMIT");
+
 		const token: TokenResponse = { token: sign(user.id) };
 
 		res.status(201).json(token);
 	} catch (error) {
+		await client.query("ROLLBACK");
+
 		// unique_violation
 		if ((error as { code?: string }).code === "23505") {
 			problem(res, 409, "email already registered");
@@ -140,6 +159,8 @@ router.post("/auth/register", async (req, res) => {
 		}
 
 		problem(res, 500, error);
+	} finally {
+		client.release();
 	}
 });
 
